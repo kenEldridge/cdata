@@ -1,0 +1,98 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cdata"
+version = "0.1.0"
+description = "Personal data scavenger - pull data from the web at will"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "Ken" }
+]
+keywords = ["data", "scraping", "api", "cli", "rdf", "sparql"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    # CLI
+    "typer[all]>=0.9.0",
+    "rich>=13.0",
+
+    # Config & Secrets
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "python-dotenv>=1.0",
+
+    # HTTP & Scraping
+    "httpx>=0.25",
+    "beautifulsoup4>=4.12",
+    "lxml>=4.9",
+
+    # Data & Storage
+    "pandas>=2.0",
+    "pyarrow>=14.0",
+
+    # Financial
+    "yfinance>=0.2",
+
+    # RSS
+    "feedparser>=6.0",
+
+    # Linked Data
+    "rdflib>=7.0",
+    "sparqlwrapper>=2.0",
+
+    # Scheduling
+    "apscheduler>=3.10",
+
+    # Utilities
+    "tenacity>=8.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.1",
+    "mypy>=1.5",
+    "pandas-stubs",
+    "types-PyYAML",
+    "types-beautifulsoup4",
+]
+
+[project.scripts]
+cdata = "cdata.cli.app:app"
+
+[project.entry-points."cdata.sources"]
+yfinance = "cdata.sources.api.financial.yfinance:YFinanceSource"
+rss = "cdata.sources.rss.feedparser:RSSSource"
+sparql = "cdata.sources.linked_data.sparql:SPARQLSource"
+scraping = "cdata.sources.scraping.generic:ScrapingSource"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cdata"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true

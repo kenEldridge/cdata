@@ -1,0 +1,34 @@
+jobs:
+  - id: daily_stocks
+    source: stocks_watchlist
+    enabled: true
+    description: "Fetch stock data daily after market close"
+    schedule:
+      type: cron
+      expression: "0 18 * * 1-5"
+    storage:
+      backend: parquet
+      partition_by:
+        - symbol
+
+  - id: daily_crypto
+    source: crypto_watchlist
+    enabled: true
+    description: "Fetch crypto data daily"
+    schedule:
+      type: cron
+      expression: "0 0 * * *"
+    storage:
+      backend: parquet
+      partition_by:
+        - symbol
+
+  - id: hourly_tech_news
+    source: tech_rss
+    enabled: true
+    description: "Fetch tech news every hour"
+    schedule:
+      type: interval
+      hours: 1
+    storage:
+      backend: parquet

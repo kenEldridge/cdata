@@ -1,0 +1,38 @@
+sources:
+  - id: dbpedia_companies
+    name: "DBpedia Companies"
+    type: sparql
+    enabled: true
+    description: "Query company info from DBpedia"
+    config:
+      endpoint: https://dbpedia.org/sparql
+      query: |
+        PREFIX dbo: <http://dbpedia.org/ontology/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT ?company ?name ?industry ?employees
+        WHERE {
+          ?company a dbo:Company ;
+                   rdfs:label ?name ;
+                   dbo:industry ?industry .
+          OPTIONAL { ?company dbo:numberOfEmployees ?employees }
+          FILTER (lang(?name) = 'en')
+        }
+        LIMIT 100
+
+  - id: wikidata_cities
+    name: "Wikidata Cities"
+    type: sparql
+    enabled: false
+    description: "Query city populations from Wikidata"
+    config:
+      endpoint: https://query.wikidata.org/sparql
+      query: |
+        SELECT ?city ?cityLabel ?population
+        WHERE {
+          ?city wdt:P31 wd:Q515 .
+          ?city wdt:P1082 ?population .
+          SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+        }
+        ORDER BY DESC(?population)
+        LIMIT 100

@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(ln:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(gh auth status:*)",
+      "Bash(ssh:*)",
+      "Bash(sudo apt update:*)",
+      "Bash(sudo apt install:*)",
+      "Bash(winget install:*)",
+      "Bash(gh.exe auth login:*)",
+      "Bash(\"/mnt/c/Program Files/GitHub CLI/gh.exe\" auth status)",
+      "Bash(cmd.exe /c \"where gh\")",
+      "Bash(powershell.exe -Command \"Get-Command gh | Select-Object -ExpandProperty Source\")",
+      "Bash(powershell.exe -Command \"& ''C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'' auth status\")",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

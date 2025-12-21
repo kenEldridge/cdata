@@ -1,0 +1,26 @@
+entities:
+  - id: apple
+    name: Apple Inc.
+    sources:
+      - stocks_watchlist
+    metadata:
+      ticker: AAPL
+      sector: Technology
+      industry: Consumer Electronics
+
+  - id: nvidia
+    name: NVIDIA Corporation
+    sources:
+      - stocks_watchlist
+    metadata:
+      ticker: NVDA
+      sector: Technology
+      industry: Semiconductors
+
+  - id: bitcoin
+    name: Bitcoin
+    sources:
+      - crypto_watchlist
+    metadata:
+      ticker: BTC-USD
+      type: Cryptocurrency

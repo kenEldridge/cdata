@@ -1,0 +1,6 @@
+# Scheduler configuration
+scheduler:
+  timezone: "America/New_York"
+  max_instances: 3
+  coalesce: true
+  misfire_grace_time: 60

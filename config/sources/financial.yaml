@@ -1,0 +1,28 @@
+sources:
+  - id: stocks_watchlist
+    name: "Stock Watchlist"
+    type: yfinance
+    enabled: true
+    description: "Track major tech stocks"
+    config:
+      symbols:
+        - AAPL
+        - GOOGL
+        - MSFT
+        - AMZN
+        - NVDA
+      period: "1mo"
+      interval: "1d"
+
+  - id: crypto_watchlist
+    name: "Crypto Watchlist"
+    type: yfinance
+    enabled: true
+    description: "Track major cryptocurrencies"
+    config:
+      symbols:
+        - BTC-USD
+        - ETH-USD
+        - SOL-USD
+      period: "1mo"
+      interval: "1d"
