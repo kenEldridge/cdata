@@ -34,6 +34,7 @@ env/
 # IDE
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
 *~
@@ -57,9 +58,12 @@ dmypy.json
 data/raw/*
 data/processed/*
 data/cache/*
+data/site/*
+data/index.json
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/cache/.gitkeep
+!data/site/.gitkeep
 
 # Logs
 logs/*.log

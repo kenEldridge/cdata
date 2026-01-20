@@ -1,22 +1,90 @@
-# Example source configuration
+# Example source configurations for cdata
+# Copy this file and modify for your own use
+#
+# Features demonstrated:
+# - primary_keys: columns used for deduplication
+# - incremental: fetch only new data since last run
+
 sources:
-  - id: my_stocks
-    name: "My Stock Watchlist"
+  # ===================
+  # Financial Data (yfinance)
+  # ===================
+  - id: stocks_example
+    name: "Stock Watchlist Example"
     type: yfinance
     enabled: true
+    description: "Example: Track stock prices with deduplication"
+    primary_keys: ["symbol", "date"]  # Prevents duplicate entries
+    incremental: true                  # Only fetch new data
     config:
       symbols:
         - AAPL
-        - GOOGL
         - MSFT
+      period: "1mo"      # Initial fetch period
+      interval: "1d"     # Daily data
 
-  - id: tech_news
-    name: "Tech News RSS"
+  # ===================
+  # RSS Feeds
+  # ===================
+  - id: rss_example
+    name: "RSS Feed Example"
     type: rss
     enabled: true
+    description: "Example: Aggregate multiple RSS feeds"
+    primary_keys: ["id"]  # RSS entry ID for deduplication
     config:
       feeds:
         - name: Hacker News
           url: https://news.ycombinator.com/rss
         - name: Lobsters
           url: https://lobste.rs/rss
+
+  # ===================
+  # Web Scraping
+  # ===================
+  - id: scraping_example
+    name: "Web Scraping Example"
+    type: scraping
+    enabled: false  # Disabled by default
+    description: "Example: Extract data from web pages"
+    config:
+      url: https://example.com
+      selectors:
+        title: "h1"
+        content: "p"
+      multiple: false  # Set true to extract all matches
+
+  # ===================
+  # SPARQL / Linked Data
+  # ===================
+  - id: sparql_example
+    name: "SPARQL Query Example"
+    type: sparql
+    enabled: false  # Disabled by default
+    description: "Example: Query DBpedia for structured data"
+    primary_keys: ["entity"]
+    config:
+      endpoint: https://dbpedia.org/sparql
+      query: |
+        PREFIX dbo: <http://dbpedia.org/ontology/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT ?entity ?name
+        WHERE {
+          ?entity a dbo:Company ;
+                  rdfs:label ?name .
+          FILTER (lang(?name) = 'en')
+        }
+        LIMIT 10
+
+  # ===================
+  # ESPN College Basketball
+  # ===================
+  - id: espn_example
+    name: "ESPN CBB Example"
+    type: espn_cbb
+    enabled: false  # Disabled by default
+    description: "Example: Fetch college basketball data"
+    primary_keys: ["game_id"]
+    config:
+      mode: scoreboard  # Options: scoreboard, rankings, teams, team

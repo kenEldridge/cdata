@@ -9,6 +9,7 @@ from rich.console import Console
 from cdata.config import get_settings, load_sources, load_jobs
 from cdata.config.schema import JobConfig, SourceConfig, StorageBackend as StorageBackendEnum
 from cdata.core.registry import get_registry
+from cdata.core.index import get_index_manager
 from cdata.models import FetchResult, FetchStatus
 from cdata.storage import ParquetStorage, CSVStorage, JSONStorage
 from cdata.storage.base import StorageBackend
@@ -23,6 +24,7 @@ class Fetcher:
     def __init__(self):
         self.settings = get_settings()
         self.registry = get_registry()
+        self.index_manager = get_index_manager()
 
     def _get_storage(self, backend: StorageBackendEnum, path: Optional[str] = None) -> StorageBackend:
         """Get storage backend instance."""
@@ -78,13 +80,64 @@ class Fetcher:
             )
 
         merged_kwargs = {**config.config, **kwargs}
+
+        # For incremental sources, pass the last record date
+        if config.incremental:
+            existing = self.index_manager.get_dataset(config.id, "raw")
+            if existing and existing.last_record_date:
+                merged_kwargs["since"] = existing.last_record_date
+
         result = source.fetch(**merged_kwargs)
 
         if save and result.records:
             storage = self._get_storage(storage_backend)
-            storage.append(result.records, config.id)
+            file_path = storage.append(result.records, config.id, config.primary_keys)
+
+            # Update index
+            df = storage.read(config.id)
+
+            # Compute last_record_date from data
+            last_record_date = self._get_last_record_date(df, config.primary_keys)
+
+            self.index_manager.update_dataset(
+                name=config.id,
+                source_id=config.id,
+                location="raw",
+                file_path=file_path,
+                record_count=len(df),
+                columns=list(df.columns),
+                description=config.description,
+                primary_keys=config.primary_keys,
+                last_record_date=last_record_date,
+            )
 
         return result
+
+    def _get_last_record_date(
+        self,
+        df: "pd.DataFrame",
+        primary_keys: Optional[list[str]] = None,
+    ) -> Optional[datetime]:
+        """Extract the most recent date from the data."""
+        import pandas as pd
+
+        if df.empty:
+            return None
+
+        # Look for common date columns
+        date_columns = ["date", "published", "timestamp", "created_at", "fetched_at", "_fetched_at"]
+
+        for col in date_columns:
+            if col in df.columns:
+                try:
+                    dates = pd.to_datetime(df[col], errors="coerce")
+                    max_date = dates.max()
+                    if pd.notna(max_date):
+                        return max_date.to_pydatetime()
+                except Exception:
+                    continue
+
+        return None
 
     def run_job(self, job_id: str, **kwargs: Any) -> FetchResult:
         """Run a job by ID."""
@@ -131,6 +184,14 @@ class Fetcher:
             )
 
         merged_kwargs = {**source_config.config, **kwargs}
+
+        # For incremental sources, pass the last record date
+        dataset_name = f"{config.source}_{config.id}"
+        if source_config.incremental:
+            existing = self.index_manager.get_dataset(dataset_name, "raw")
+            if existing and existing.last_record_date:
+                merged_kwargs["since"] = existing.last_record_date
+
         result = source.fetch(**merged_kwargs)
         result.job_id = config.id
 
@@ -139,9 +200,22 @@ class Fetcher:
                 config.storage.backend,
                 config.storage.path,
             )
-            storage.append(
-                result.records,
-                f"{config.source}_{config.id}",
+            file_path = storage.append(result.records, dataset_name, source_config.primary_keys)
+
+            # Update index
+            df = storage.read(dataset_name)
+            last_record_date = self._get_last_record_date(df, source_config.primary_keys)
+
+            self.index_manager.update_dataset(
+                name=dataset_name,
+                source_id=config.source,
+                location="raw",
+                file_path=file_path,
+                record_count=len(df),
+                columns=list(df.columns),
+                description=config.description,
+                primary_keys=source_config.primary_keys,
+                last_record_date=last_record_date,
             )
 
         return result

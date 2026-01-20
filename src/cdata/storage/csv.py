@@ -72,6 +72,7 @@ class CSVStorage(StorageBackend):
         self,
         records: list[Record],
         name: str,
+        primary_keys: Optional[list[str]] = None,
     ) -> Path:
         df_new = self._records_to_dataframe(records)
         if df_new.empty:
@@ -80,7 +81,11 @@ class CSVStorage(StorageBackend):
         file_path = self.base_path / f"{name}.csv"
 
         if file_path.exists():
-            df_new.to_csv(file_path, mode="a", header=False, index=False)
+            df_existing = self.read(name)
+            df_combined = pd.concat([df_existing, df_new], ignore_index=True)
+            # Deduplicate if primary keys specified
+            df_combined = self._deduplicate(df_combined, primary_keys)
+            df_combined.to_csv(file_path, index=False)
         else:
             df_new.to_csv(file_path, index=False)
 

@@ -8,7 +8,9 @@ from rich.console import Console
 from rich.table import Table
 
 from cdata.config import get_settings
+from cdata.core.index import get_index_manager
 from cdata.storage import ParquetStorage
+from cdata.web import generate_static_site
 
 app = typer.Typer()
 console = Console()
@@ -156,6 +158,75 @@ def delete_dataset(
 
     if storage.delete(dataset):
         console.print(f"[green]Deleted '{dataset}'.[/green]")
+        # Also remove from index
+        index_manager = get_index_manager()
+        index_manager.remove_dataset(dataset, "raw" if raw else "processed")
     else:
         console.print(f"[red]Failed to delete '{dataset}'.[/red]")
         raise typer.Exit(1)
+
+
+@app.command("index")
+def show_index():
+    """Show the dataset index."""
+    index_manager = get_index_manager()
+    datasets = index_manager.list_datasets()
+
+    if not datasets:
+        console.print("[yellow]No datasets in index. Run 'cdata data rebuild-index' to build it.[/yellow]")
+        return
+
+    table = Table(title="Dataset Index")
+    table.add_column("Name", style="cyan")
+    table.add_column("Source")
+    table.add_column("Records", justify="right")
+    table.add_column("Size", justify="right")
+    table.add_column("Last Updated")
+    table.add_column("Fetches", justify="right")
+
+    for entry in datasets:
+        size_kb = entry.file_size_bytes / 1024
+        size_str = f"{size_kb:.1f} KB" if size_kb < 1024 else f"{size_kb/1024:.1f} MB"
+        table.add_row(
+            entry.name,
+            entry.source_id,
+            str(entry.record_count),
+            size_str,
+            entry.last_updated.strftime("%Y-%m-%d %H:%M"),
+            str(entry.fetch_count),
+        )
+
+    console.print(table)
+    console.print(f"\n[dim]Index: {index_manager.index_path}[/dim]")
+
+
+@app.command("rebuild-index")
+def rebuild_index():
+    """Rebuild the dataset index from files."""
+    index_manager = get_index_manager()
+
+    console.print("Scanning data directories...")
+    count = index_manager.rebuild()
+
+    console.print(f"[green]Rebuilt index with {count} datasets.[/green]")
+    console.print(f"Index saved to: {index_manager.index_path}")
+
+
+@app.command("site")
+def generate_site(
+    output: Optional[str] = typer.Option(None, "--output", "-o", help="Output directory"),
+    open_browser: bool = typer.Option(False, "--open", help="Open in browser after generating"),
+):
+    """Generate static HTML frontend for the data index."""
+    from pathlib import Path
+    import webbrowser
+
+    output_path = Path(output) if output else None
+    index_path = generate_static_site(output_path)
+
+    console.print(f"[green]Static site generated![/green]")
+    console.print(f"  index.html: {index_path}")
+    console.print(f"  index.json: {index_path.parent / 'index.json'}")
+
+    if open_browser:
+        webbrowser.open(f"file://{index_path.absolute()}")

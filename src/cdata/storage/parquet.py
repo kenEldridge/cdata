@@ -68,6 +68,7 @@ class ParquetStorage(StorageBackend):
         self,
         records: list[Record],
         name: str,
+        primary_keys: Optional[list[str]] = None,
     ) -> Path:
         df_new = self._records_to_dataframe(records)
         if df_new.empty:
@@ -80,6 +81,9 @@ class ParquetStorage(StorageBackend):
             df_combined = pd.concat([df_existing, df_new], ignore_index=True)
         else:
             df_combined = df_new
+
+        # Deduplicate if primary keys specified
+        df_combined = self._deduplicate(df_combined, primary_keys)
 
         table = pa.Table.from_pandas(df_combined)
         pq.write_table(table, file_path)
