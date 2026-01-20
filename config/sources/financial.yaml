@@ -11,7 +11,7 @@ sources:
         - MSFT
         - AMZN
         - NVDA
-      period: "1mo"
+      period: "1y"
       interval: "1d"
 
   - id: crypto_watchlist
@@ -24,5 +24,5 @@ sources:
         - BTC-USD
         - ETH-USD
         - SOL-USD
-      period: "1mo"
+      period: "1y"
       interval: "1d"

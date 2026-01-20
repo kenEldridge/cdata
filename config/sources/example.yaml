@@ -1,0 +1,22 @@
+# Example source configuration
+sources:
+  - id: my_stocks
+    name: "My Stock Watchlist"
+    type: yfinance
+    enabled: true
+    config:
+      symbols:
+        - AAPL
+        - GOOGL
+        - MSFT
+
+  - id: tech_news
+    name: "Tech News RSS"
+    type: rss
+    enabled: true
+    config:
+      feeds:
+        - name: Hacker News
+          url: https://news.ycombinator.com/rss
+        - name: Lobsters
+          url: https://lobste.rs/rss
