@@ -23,7 +23,7 @@ sources:
   - id: wikidata_cities
     name: "Wikidata Cities"
     type: sparql
-    enabled: false
+    enabled: true
     description: "Query city populations from Wikidata"
     config:
       endpoint: https://query.wikidata.org/sparql
