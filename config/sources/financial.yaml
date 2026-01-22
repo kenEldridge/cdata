@@ -1,0 +1,226 @@
+# Financial & Macroeconomic Data Sources for the-derple-dex
+# Focus: US and global markets, fiscal/monetary policy, macro indicators
+
+sources:
+  # ===================
+  # US EQUITY INDICES
+  # ===================
+  - id: us_indices
+    name: "US Market Indices"
+    type: yfinance
+    enabled: true
+    description: "Major US equity indices"
+    primary_keys: ["symbol", "date"]
+    incremental: true
+    config:
+      symbols:
+        - ^GSPC       # S&P 500
+        - ^DJI        # Dow Jones Industrial
+        - ^IXIC       # NASDAQ Composite
+        - ^RUT        # Russell 2000 (small cap)
+        - ^VIX        # Volatility Index
+      period: "1y"
+      interval: "1d"
+
+  # ===================
+  # GLOBAL EQUITY INDICES
+  # ===================
+  - id: global_indices
+    name: "Global Market Indices"
+    type: yfinance
+    enabled: true
+    description: "Major international equity indices"
+    primary_keys: ["symbol", "date"]
+    incremental: true
+    config:
+      symbols:
+        - ^FTSE       # UK FTSE 100
+        - ^GDAXI      # Germany DAX
+        - ^FCHI       # France CAC 40
+        - ^N225       # Japan Nikkei 225
+        - ^HSI        # Hong Kong Hang Seng
+        - ^STOXX50E   # Euro Stoxx 50
+        - FXI         # China Large-Cap ETF
+        - EEM         # Emerging Markets ETF
+      period: "1y"
+      interval: "1d"
+
+  # ===================
+  # US TREASURY YIELDS
+  # ===================
+  - id: treasury_yields
+    name: "US Treasury Yields"
+    type: yfinance
+    enabled: true
+    description: "Treasury yield curve data"
+    primary_keys: ["symbol", "date"]
+    incremental: true
+    config:
+      symbols:
+        - ^IRX        # 13-week T-Bill
+        - ^FVX        # 5-year Treasury
+        - ^TNX        # 10-year Treasury
+        - ^TYX        # 30-year Treasury
+      period: "1y"
+      interval: "1d"
+
+  # ===================
+  # BOND ETFs
+  # ===================
+  - id: bond_etfs
+    name: "Bond ETFs"
+    type: yfinance
+    enabled: true
+    description: "Fixed income ETFs across durations and types"
+    primary_keys: ["symbol", "date"]
+    incremental: true
+    config:
+      symbols:
+        - TLT         # 20+ Year Treasury
+        - IEF         # 7-10 Year Treasury
+        - SHY         # 1-3 Year Treasury
+        - AGG         # US Aggregate Bond
+        - LQD         # Investment Grade Corporate
+        - HYG         # High Yield Corporate
+        - TIP         # TIPS (inflation-protected)
+        - MUB         # Municipal Bonds
+      period: "1y"
+      interval: "1d"
+
+  # ===================
+  # CURRENCIES & DOLLAR
+  # ===================
+  - id: currencies
+    name: "Currencies & Dollar Index"
+    type: yfinance
+    enabled: true
+    description: "Dollar strength and major currency pairs"
+    primary_keys: ["symbol", "date"]
+    incremental: true
+    config:
+      symbols:
+        - DX-Y.NYB    # US Dollar Index
+        - EURUSD=X    # Euro/USD
+        - GBPUSD=X    # British Pound/USD
+        - USDJPY=X    # USD/Japanese Yen
+        - USDCNY=X    # USD/Chinese Yuan
+      period: "1y"
+      interval: "1d"
+
+  # ===================
+  # COMMODITIES
+  # ===================
+  - id: commodities
+    name: "Commodities"
+    type: yfinance
+    enabled: true
+    description: "Key commodity prices"
+    primary_keys: ["symbol", "date"]
+    incremental: true
+    config:
+      symbols:
+        - GC=F        # Gold Futures
+        - SI=F        # Silver Futures
+        - CL=F        # Crude Oil (WTI)
+        - BZ=F        # Brent Crude
+        - NG=F        # Natural Gas
+        - HG=F        # Copper
+      period: "1y"
+      interval: "1d"
+
+  # ===================
+  # SECTOR ETFs
+  # ===================
+  - id: sector_etfs
+    name: "US Sector ETFs"
+    type: yfinance
+    enabled: true
+    description: "S&P 500 sector performance"
+    primary_keys: ["symbol", "date"]
+    incremental: true
+    config:
+      symbols:
+        - XLF         # Financials
+        - XLK         # Technology
+        - XLE         # Energy
+        - XLV         # Healthcare
+        - XLI         # Industrials
+        - XLP         # Consumer Staples
+        - XLY         # Consumer Discretionary
+        - XLU         # Utilities
+        - XLB         # Materials
+        - XLRE        # Real Estate
+      period: "1y"
+      interval: "1d"
+
+  # ===================
+  # MACRO INDICATOR PROXIES
+  # ===================
+  - id: macro_proxies
+    name: "Macro Indicator Proxies"
+    type: yfinance
+    enabled: true
+    description: "ETFs that track macro themes"
+    primary_keys: ["symbol", "date"]
+    incremental: true
+    config:
+      symbols:
+        - SPY         # S&P 500 ETF (market benchmark)
+        - QQQ         # NASDAQ 100 (tech/growth)
+        - IWM         # Russell 2000 (small cap/domestic)
+        - DBA         # Agriculture
+        - UUP         # Dollar Bullish
+        - GLD         # Gold (inflation hedge)
+        - GOVT        # US Treasuries
+      period: "1y"
+      interval: "1d"
+
+  # ===================
+  # FEDERAL RESERVE & POLICY NEWS
+  # ===================
+  - id: fed_news
+    name: "Federal Reserve News"
+    type: rss
+    enabled: true
+    description: "Federal Reserve announcements and speeches"
+    primary_keys: ["id"]
+    config:
+      feeds:
+        - name: Federal Reserve Press Releases
+          url: https://www.federalreserve.gov/feeds/press_all.xml
+        - name: Fed Speeches
+          url: https://www.federalreserve.gov/feeds/speeches.xml
+
+  # ===================
+  # FINANCIAL NEWS
+  # ===================
+  - id: financial_news
+    name: "Financial News"
+    type: rss
+    enabled: true
+    description: "Market and economic news feeds"
+    primary_keys: ["id"]
+    config:
+      feeds:
+        - name: Yahoo Finance
+          url: https://finance.yahoo.com/news/rssindex
+        - name: Seeking Alpha Market News
+          url: https://seekingalpha.com/market_currents.xml
+        - name: CNBC Top News
+          url: https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114
+
+  # ===================
+  # ECONOMIC DATA NEWS
+  # ===================
+  - id: economics_news
+    name: "Economics & Policy News"
+    type: rss
+    enabled: true
+    description: "Economic analysis and policy coverage"
+    primary_keys: ["id"]
+    config:
+      feeds:
+        - name: Calculated Risk
+          url: https://www.calculatedriskblog.com/feeds/posts/default?alt=rss
+        - name: Marginal Revolution
+          url: https://marginalrevolution.com/feed

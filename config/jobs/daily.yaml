@@ -1,8 +1,23 @@
+# Daily scheduled jobs for financial data
+# Run after US market close (6 PM ET)
+
 jobs:
-  - id: daily_stocks
-    source: stocks_watchlist
+  - id: daily_us_markets
+    source: us_indices
     enabled: true
-    description: "Fetch stock data daily after market close"
+    description: "Fetch US indices after market close"
+    schedule:
+      type: cron
+      expression: "0 18 * * 1-5"  # 6 PM weekdays
+    storage:
+      backend: parquet
+      partition_by:
+        - symbol
+
+  - id: daily_global_markets
+    source: global_indices
+    enabled: true
+    description: "Fetch global indices daily"
     schedule:
       type: cron
       expression: "0 18 * * 1-5"
@@ -11,22 +26,102 @@ jobs:
       partition_by:
         - symbol
 
-  - id: daily_crypto
-    source: crypto_watchlist
+  - id: daily_treasuries
+    source: treasury_yields
     enabled: true
-    description: "Fetch crypto data daily"
+    description: "Fetch treasury yields"
     schedule:
       type: cron
-      expression: "0 0 * * *"
+      expression: "0 18 * * 1-5"
     storage:
       backend: parquet
       partition_by:
         - symbol
 
-  - id: hourly_tech_news
-    source: tech_rss
+  - id: daily_bonds
+    source: bond_etfs
     enabled: true
-    description: "Fetch tech news every hour"
+    description: "Fetch bond ETF prices"
+    schedule:
+      type: cron
+      expression: "0 18 * * 1-5"
+    storage:
+      backend: parquet
+      partition_by:
+        - symbol
+
+  - id: daily_currencies
+    source: currencies
+    enabled: true
+    description: "Fetch currency data"
+    schedule:
+      type: cron
+      expression: "0 18 * * 1-5"
+    storage:
+      backend: parquet
+      partition_by:
+        - symbol
+
+  - id: daily_commodities
+    source: commodities
+    enabled: true
+    description: "Fetch commodity prices"
+    schedule:
+      type: cron
+      expression: "0 18 * * 1-5"
+    storage:
+      backend: parquet
+      partition_by:
+        - symbol
+
+  - id: daily_sectors
+    source: sector_etfs
+    enabled: true
+    description: "Fetch sector ETF prices"
+    schedule:
+      type: cron
+      expression: "0 18 * * 1-5"
+    storage:
+      backend: parquet
+      partition_by:
+        - symbol
+
+  - id: daily_macro
+    source: macro_proxies
+    enabled: true
+    description: "Fetch macro proxy ETFs"
+    schedule:
+      type: cron
+      expression: "0 18 * * 1-5"
+    storage:
+      backend: parquet
+      partition_by:
+        - symbol
+
+  - id: hourly_fed_news
+    source: fed_news
+    enabled: true
+    description: "Check Fed news hourly during market hours"
+    schedule:
+      type: cron
+      expression: "0 9-18 * * 1-5"  # 9 AM - 6 PM weekdays
+    storage:
+      backend: parquet
+
+  - id: hourly_financial_news
+    source: financial_news
+    enabled: true
+    description: "Fetch financial news hourly"
+    schedule:
+      type: interval
+      hours: 1
+    storage:
+      backend: parquet
+
+  - id: hourly_economics_news
+    source: economics_news
+    enabled: true
+    description: "Fetch economics news hourly"
     schedule:
       type: interval
       hours: 1

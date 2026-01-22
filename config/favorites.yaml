@@ -1,26 +1,60 @@
+# Key entities to track across data sources
+# These help correlate data across different sources
+
 entities:
-  - id: apple
-    name: Apple Inc.
+  # Market Benchmarks
+  - id: sp500
+    name: "S&P 500"
     sources:
-      - stocks_watchlist
+      - us_indices
+      - macro_proxies
     metadata:
-      ticker: AAPL
-      sector: Technology
-      industry: Consumer Electronics
+      symbols: ["^GSPC", "SPY"]
+      type: index
+      description: "US large-cap benchmark"
 
-  - id: nvidia
-    name: NVIDIA Corporation
+  - id: treasury_10y
+    name: "10-Year Treasury"
     sources:
-      - stocks_watchlist
+      - treasury_yields
     metadata:
-      ticker: NVDA
-      sector: Technology
-      industry: Semiconductors
+      symbols: ["^TNX"]
+      type: yield
+      description: "Benchmark risk-free rate"
 
-  - id: bitcoin
-    name: Bitcoin
+  - id: dollar_index
+    name: "US Dollar Index"
     sources:
-      - crypto_watchlist
+      - currencies
     metadata:
-      ticker: BTC-USD
-      type: Cryptocurrency
+      symbols: ["DX-Y.NYB"]
+      type: currency
+      description: "Dollar strength vs basket"
+
+  - id: gold
+    name: "Gold"
+    sources:
+      - commodities
+      - macro_proxies
+    metadata:
+      symbols: ["GC=F", "GLD"]
+      type: commodity
+      description: "Safe haven / inflation hedge"
+
+  - id: crude_oil
+    name: "Crude Oil (WTI)"
+    sources:
+      - commodities
+    metadata:
+      symbols: ["CL=F"]
+      type: commodity
+      description: "Energy price benchmark"
+
+  - id: vix
+    name: "VIX Volatility Index"
+    sources:
+      - us_indices
+    metadata:
+      symbols: ["^VIX"]
+      type: volatility
+      description: "Market fear gauge"
