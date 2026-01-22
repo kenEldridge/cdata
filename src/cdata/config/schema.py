@@ -49,6 +49,8 @@ class SourceConfig(BaseModel):
     enabled: bool = True
     config: dict[str, Any] = Field(default_factory=dict)
     description: Optional[str] = None
+    primary_keys: Optional[list[str]] = None  # Columns for deduplication
+    incremental: bool = False  # Whether to fetch incrementally
 
 
 class JobConfig(BaseModel):

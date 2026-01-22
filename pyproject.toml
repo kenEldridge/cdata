@@ -82,6 +82,7 @@ yfinance = "cdata.sources.api.financial.yfinance:YFinanceSource"
 rss = "cdata.sources.rss.feedparser:RSSSource"
 sparql = "cdata.sources.linked_data.sparql:SPARQLSource"
 scraping = "cdata.sources.scraping.generic:ScrapingSource"
+espn_cbb = "cdata.sources.api.sports.espn_cbb:ESPNCBBSource"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cdata"]

@@ -25,6 +25,7 @@ class YFinanceSource(BaseSource):
             symbols: List of stock symbols
             period: Data period (1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max)
             interval: Data interval (1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo)
+            since: Fetch data since this datetime (for incremental fetching)
         """
         started_at = datetime.utcnow()
         records: list[Record] = []
@@ -33,6 +34,7 @@ class YFinanceSource(BaseSource):
         symbols = kwargs.get("symbols", [])
         period = kwargs.get("period", "1mo")
         interval = kwargs.get("interval", "1d")
+        since = kwargs.get("since")  # datetime for incremental fetching
 
         if isinstance(symbols, str):
             symbols = [s.strip() for s in symbols.split(",")]
@@ -40,10 +42,19 @@ class YFinanceSource(BaseSource):
         for symbol in symbols:
             try:
                 ticker = yf.Ticker(symbol)
-                hist = ticker.history(period=period, interval=interval)
+
+                # Use start date if provided (incremental), otherwise use period
+                if since:
+                    # Add 1 day to avoid refetching the last date
+                    from datetime import timedelta
+                    start_date = since + timedelta(days=1)
+                    hist = ticker.history(start=start_date.strftime("%Y-%m-%d"), interval=interval)
+                else:
+                    hist = ticker.history(period=period, interval=interval)
 
                 if hist.empty:
-                    errors.append(f"No data for {symbol}")
+                    if not since:  # Only report as error if not incremental
+                        errors.append(f"No data for {symbol}")
                     continue
 
                 for idx, row in hist.iterrows():

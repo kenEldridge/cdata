@@ -93,3 +93,9 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
         registry.register("scraping", ScrapingSource)
     except ImportError:
         pass
+
+    try:
+        from cdata.sources.api.sports.espn_cbb import ESPNCBBSource
+        registry.register("espn_cbb", ESPNCBBSource)
+    except ImportError:
+        pass

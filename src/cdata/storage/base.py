@@ -63,12 +63,14 @@ class StorageBackend(ABC):
         self,
         records: list[Record],
         name: str,
+        primary_keys: Optional[list[str]] = None,
     ) -> Path:
         """Append records to existing data.
 
         Args:
             records: List of records to append
             name: Dataset name
+            primary_keys: Columns for deduplication
 
         Returns:
             Path to data
@@ -118,3 +120,37 @@ class StorageBackend(ABC):
             rows.append(row)
 
         return pd.DataFrame(rows)
+
+    def _deduplicate(
+        self,
+        df: pd.DataFrame,
+        primary_keys: Optional[list[str]] = None,
+    ) -> pd.DataFrame:
+        """Deduplicate DataFrame, keeping the most recent record.
+
+        Args:
+            df: DataFrame to deduplicate
+            primary_keys: Columns that define uniqueness. If None, no dedup.
+
+        Returns:
+            Deduplicated DataFrame
+        """
+        if df.empty or not primary_keys:
+            return df
+
+        # Check that all primary keys exist in the dataframe
+        missing_keys = [k for k in primary_keys if k not in df.columns]
+        if missing_keys:
+            return df
+
+        # Sort by _fetched_at descending so we keep the most recent
+        if "_fetched_at" in df.columns:
+            df = df.sort_values("_fetched_at", ascending=False)
+
+        # Drop duplicates, keeping first (most recent)
+        df = df.drop_duplicates(subset=primary_keys, keep="first")
+
+        # Re-sort by primary keys for consistent ordering
+        df = df.sort_values(primary_keys).reset_index(drop=True)
+
+        return df

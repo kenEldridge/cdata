@@ -90,6 +90,7 @@ class JSONStorage(StorageBackend):
         self,
         records: list[Record],
         name: str,
+        primary_keys: Optional[list[str]] = None,
     ) -> Path:
         df_new = self._records_to_dataframe(records)
         if df_new.empty:
@@ -102,6 +103,9 @@ class JSONStorage(StorageBackend):
             df_combined = pd.concat([df_existing, df_new], ignore_index=True)
         else:
             df_combined = df_new
+
+        # Deduplicate if primary keys specified
+        df_combined = self._deduplicate(df_combined, primary_keys)
 
         data = df_combined.to_dict(orient="records")
         with open(file_path, "w") as f:
