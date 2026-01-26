@@ -339,6 +339,71 @@ sources:
         - UMCSENT       # U Michigan Consumer Sentiment
         - DSPIC96       # Real Disposable Income
 
+  - id: fred_banking
+    name: "Banking & Credit (H.8)"
+    type: fred
+    enabled: true
+    description: "H.8 commercial banking data and credit conditions"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - TOTBKCR       # Bank Credit, All Commercial Banks
+        - BUSLOANS      # Commercial and Industrial Loans
+        - CONSUMER      # Consumer Loans
+        - RESIDUAL      # Other Loans and Leases
+        - TOTLL         # Loans and Leases in Bank Credit
+        - DPSACBW027SBOG  # Deposits, All Commercial Banks
+        - RCFD2170      # Total Assets (call report)
+
+  - id: fred_stress_index
+    name: "Financial Stress Indices"
+    type: fred
+    enabled: true
+    description: "Composite financial stress and conditions indicators"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - STLFSI2       # St. Louis Fed Financial Stress Index
+        - NFCI          # Chicago Fed National Financial Conditions Index
+        - CFSI          # Cleveland Financial Stress Index
+
+  - id: fred_mev
+    name: "Macro Scenario Variables (MEV)"
+    type: fred
+    enabled: true
+    description: "Key macroeconomic variables used in stress test scenario design"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - GDPC1         # Real GDP
+        - UNRATE        # Unemployment Rate
+        - CPIAUCSL      # CPI All Items
+        - DGS10         # 10-Year Treasury Yield
+        - CSUSHPINSA    # Case-Shiller Home Price Index
+        - MORTGAGE30US  # 30-Year Mortgage Rate
+        - DTWEXBGS      # Trade Weighted Dollar Index (Broad)
+        - VIXCLS        # CBOE Volatility Index (daily)
+
+  - id: fred_market
+    name: "Market Snapshot"
+    type: fred
+    enabled: true
+    description: "Broad market indicators and risk measures"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - SP500         # S&P 500
+        - VIXCLS        # CBOE Volatility Index
+        - DTWEXBGS      # Trade Weighted Dollar Index (Broad)
+        - BAMLH0A0HYM2  # ICE BofA High Yield Spread
+        - BAMLC0A0CM    # ICE BofA Corporate Master Spread
+        - TEDRATE       # TED Spread
+        - T10YIE        # 10-Year Breakeven Inflation Rate
+
   # ===================
   # BLS - LABOR STATISTICS
   # ===================
