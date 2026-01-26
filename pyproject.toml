@@ -48,6 +48,7 @@ dependencies = [
 
     # Financial
     "yfinance>=0.2",
+    "fredapi>=0.5",
 
     # RSS
     "feedparser>=6.0",
@@ -79,9 +80,11 @@ cdata = "cdata.cli.app:app"
 
 [project.entry-points."cdata.sources"]
 yfinance = "cdata.sources.api.financial.yfinance:YFinanceSource"
+fred = "cdata.sources.api.financial.fred:FREDSource"
 rss = "cdata.sources.rss.feedparser:RSSSource"
 sparql = "cdata.sources.linked_data.sparql:SPARQLSource"
 scraping = "cdata.sources.scraping.generic:ScrapingSource"
+fed_stress = "cdata.sources.api.financial.fed_stress:FedStressSource"
 espn_cbb = "cdata.sources.api.sports.espn_cbb:ESPNCBBSource"
 
 [tool.hatch.build.targets.wheel]

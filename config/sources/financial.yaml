@@ -224,3 +224,207 @@ sources:
           url: https://www.calculatedriskblog.com/feeds/posts/default?alt=rss
         - name: Marginal Revolution
           url: https://marginalrevolution.com/feed
+
+  # ===================
+  # FRED - MACRO INDICATORS
+  # ===================
+  - id: fred_gdp
+    name: "GDP & Output"
+    type: fred
+    enabled: true
+    description: "Gross Domestic Product and related measures"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - GDP           # Gross Domestic Product
+        - GDPC1         # Real GDP
+        - A191RL1Q225SBEA  # Real GDP growth rate
+        - GDPDEF        # GDP Deflator
+
+  - id: fred_employment
+    name: "Employment & Labor"
+    type: fred
+    enabled: true
+    description: "Employment, unemployment, and labor market indicators"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - UNRATE        # Unemployment Rate
+        - PAYEMS        # Total Nonfarm Payrolls
+        - ICSA          # Initial Jobless Claims
+        - JTSJOL        # Job Openings (JOLTS)
+        - AWHAETP       # Avg Weekly Hours
+        - CES0500000003 # Avg Hourly Earnings
+
+  - id: fred_inflation
+    name: "Inflation & Prices"
+    type: fred
+    enabled: true
+    description: "Consumer and producer price indices"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - CPIAUCSL      # CPI All Items
+        - CPILFESL      # Core CPI (ex food & energy)
+        - PCEPI         # PCE Price Index
+        - PCEPILFE      # Core PCE
+        - PPIACO        # PPI All Commodities
+        - MICH          # U Michigan Inflation Expectations
+
+  - id: fred_rates
+    name: "Interest Rates & Yields"
+    type: fred
+    enabled: true
+    description: "Federal Reserve rates and Treasury yields"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - FEDFUNDS      # Fed Funds Rate
+        - DFEDTARU      # Fed Funds Target Upper
+        - DFEDTARL      # Fed Funds Target Lower
+        - DGS2          # 2-Year Treasury
+        - DGS10         # 10-Year Treasury
+        - DGS30         # 30-Year Treasury
+        - T10Y2Y        # 10Y-2Y Spread
+        - T10Y3M        # 10Y-3M Spread
+        - BAMLH0A0HYM2  # High Yield Spread
+
+  - id: fred_money
+    name: "Money Supply & Credit"
+    type: fred
+    enabled: true
+    description: "Monetary aggregates and credit conditions"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - M1SL          # M1 Money Stock
+        - M2SL          # M2 Money Stock
+        - WALCL         # Fed Balance Sheet
+        - TOTRESNS      # Total Reserves
+        - TOTALSL       # Consumer Credit
+
+  - id: fred_housing
+    name: "Housing & Real Estate"
+    type: fred
+    enabled: true
+    description: "Housing market indicators"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - HOUST         # Housing Starts
+        - PERMIT        # Building Permits
+        - HSN1F         # New Home Sales
+        - EXHOSLUSM495S # Existing Home Sales
+        - CSUSHPINSA    # Case-Shiller Home Price Index
+        - MORTGAGE30US  # 30-Year Mortgage Rate
+
+  - id: fred_consumer
+    name: "Consumer & Retail"
+    type: fred
+    enabled: true
+    description: "Consumer spending and sentiment"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - RSAFS         # Retail Sales
+        - PCE           # Personal Consumption Expenditures
+        - PSAVERT       # Personal Saving Rate
+        - UMCSENT       # U Michigan Consumer Sentiment
+        - DSPIC96       # Real Disposable Income
+
+  # ===================
+  # BLS - LABOR STATISTICS
+  # ===================
+  - id: bls_cpi
+    name: "BLS Consumer Price Index"
+    type: bls
+    enabled: true
+    description: "CPI inflation measures from Bureau of Labor Statistics"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - CUSR0000SA0     # CPI All Items (Seasonally Adjusted)
+        - CUSR0000SA0L1E  # Core CPI (ex food & energy)
+        - CUUR0000SA0     # CPI All Items (Not Seasonally Adjusted)
+
+  - id: bls_employment
+    name: "BLS Employment"
+    type: bls
+    enabled: true
+    description: "Employment and unemployment from Bureau of Labor Statistics"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - LNS14000000     # Unemployment Rate
+        - LNS11000000     # Labor Force Participation Rate
+        - CES0000000001   # Total Nonfarm Employment
+        - CES0500000001   # Total Private Employment
+
+  - id: bls_wages
+    name: "BLS Wages & Earnings"
+    type: bls
+    enabled: true
+    description: "Wage and earnings data from Bureau of Labor Statistics"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - CES0500000003   # Average Hourly Earnings (Private)
+        - CES0500000011   # Average Weekly Earnings (Private)
+
+  - id: bls_ppi
+    name: "BLS Producer Price Index"
+    type: bls
+    enabled: true
+    description: "Producer prices from Bureau of Labor Statistics"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - WPUFD4          # PPI Finished Goods
+        - WPSFD4          # PPI Finished Goods (Seasonally Adjusted)
+        - WPUFD49104      # PPI Finished Core Goods
+
+  - id: bls_jolts
+    name: "BLS JOLTS"
+    type: bls
+    enabled: true
+    description: "Job Openings and Labor Turnover Survey"
+    primary_keys: ["series_id", "date"]
+    incremental: true
+    config:
+      series:
+        - JTS000000000000000JOL  # Job Openings Total Nonfarm
+        - JTS000000000000000HIR  # Hires Total Nonfarm
+        - JTS000000000000000QUL  # Quits Total Nonfarm
+        - JTS000000000000000TSL  # Total Separations
+
+  # ===================
+  # FED STRESS TEST SCENARIOS
+  # ===================
+  - id: fed_stress_scenarios
+    name: "Fed Stress Test Scenarios"
+    type: fed_stress
+    enabled: true
+    description: "Federal Reserve DFAST supervisory stress test scenarios (baseline & severely adverse)"
+    primary_keys: ["year", "table", "date"]
+    config:
+      years:
+        - 2024
+        - 2025
+      scenarios:
+        - baseline_domestic
+        - baseline_international
+        - severely_adverse_domestic
+        - severely_adverse_international
+        - historic_domestic
+        - historic_international
