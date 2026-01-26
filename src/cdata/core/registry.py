@@ -77,6 +77,18 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
         pass
 
     try:
+        from cdata.sources.api.financial.fred import FREDSource
+        registry.register("fred", FREDSource)
+    except ImportError:
+        pass
+
+    try:
+        from cdata.sources.api.financial.bls import BLSSource
+        registry.register("bls", BLSSource)
+    except ImportError:
+        pass
+
+    try:
         from cdata.sources.rss.feedparser import RSSSource
         registry.register("rss", RSSSource)
     except ImportError:
@@ -91,6 +103,12 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
     try:
         from cdata.sources.scraping.generic import ScrapingSource
         registry.register("scraping", ScrapingSource)
+    except ImportError:
+        pass
+
+    try:
+        from cdata.sources.api.financial.fed_stress import FedStressSource
+        registry.register("fed_stress", FedStressSource)
     except ImportError:
         pass
 
