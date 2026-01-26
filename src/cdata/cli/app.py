@@ -25,7 +25,9 @@ app.add_typer(favorites.app, name="favorites", help="Manage favorite entities")
 @app.callback()
 def main():
     """cdata - Personal data scavenger."""
-    pass
+    from dotenv import load_dotenv
+
+    load_dotenv()
 
 
 if __name__ == "__main__":
