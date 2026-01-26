@@ -20,14 +20,23 @@ from cdata.sources.base import BaseSource
 
 BASE_URL = "https://www.federalreserve.gov/supervisionreg/files"
 
-# Table definitions: (table_id, scenario_name, region)
-TABLES = {
-    "historic_domestic": ("1A", "Historic", "Domestic"),
-    "historic_international": ("1B", "Historic", "International"),
-    "baseline_domestic": ("2A", "Supervisory_Baseline", "Domestic"),
-    "baseline_international": ("2B", "Supervisory_Baseline", "International"),
-    "severely_adverse_domestic": ("3A", "Supervisory_Severely_Adverse", "Domestic"),
-    "severely_adverse_international": ("3B", "Supervisory_Severely_Adverse", "International"),
+# Scenario definitions: key -> (scenario_name, region, region_letter)
+SCENARIOS = {
+    "historic_domestic": ("Historic", "Domestic", "A"),
+    "historic_international": ("Historic", "International", "B"),
+    "baseline_domestic": ("Supervisory_Baseline", "Domestic", "A"),
+    "baseline_international": ("Supervisory_Baseline", "International", "B"),
+    "severely_adverse_domestic": ("Supervisory_Severely_Adverse", "Domestic", "A"),
+    "severely_adverse_international": ("Supervisory_Severely_Adverse", "International", "B"),
+}
+
+# Table number for each scenario type by year.
+# Most years: Historic=1, Baseline=2, Severely Adverse=3
+# 2024 added an Adverse scenario as Table 1, shifting others up by 1.
+_TABLE_NUMBERS = {
+    "Historic": {"default": 1, 2024: 2},
+    "Supervisory_Baseline": {"default": 2, 2024: 3},
+    "Supervisory_Severely_Adverse": {"default": 3, 2024: 4},
 }
 
 # Domestic columns (Table 1A/2A/3A)
@@ -73,15 +82,16 @@ INTERNATIONAL_COLUMNS = [
 
 def _build_csv_url(year: int, table_key: str) -> str:
     """Build the download URL for a scenario CSV file."""
-    table_id, scenario, region = TABLES[table_key]
-    return f"{BASE_URL}/{year}-Table_{table_id}_{scenario}_{region}.csv"
+    scenario, region, letter = SCENARIOS[table_key]
+    num = _TABLE_NUMBERS[scenario].get(year, _TABLE_NUMBERS[scenario]["default"])
+    return f"{BASE_URL}/{year}-Table_{num}{letter}_{scenario}_{region}.csv"
 
 
-def _parse_value(val: str) -> float | str:
-    """Parse a CSV cell value to float if possible."""
+def _parse_value(val: str) -> float | str | None:
+    """Parse a CSV cell value to float if possible, None if empty."""
     val = val.strip()
     if not val:
-        return val
+        return None
     try:
         return float(val.replace(",", ""))
     except ValueError:
@@ -128,13 +138,13 @@ class FedStressSource(BaseSource):
         if isinstance(years, int):
             years = [years]
 
-        scenarios = kwargs.get("scenarios", list(TABLES.keys()))
+        scenarios = kwargs.get("scenarios", list(SCENARIOS.keys()))
         if isinstance(scenarios, str):
             scenarios = [s.strip() for s in scenarios.split(",")]
 
         for year in years:
             for scenario_key in scenarios:
-                if scenario_key not in TABLES:
+                if scenario_key not in SCENARIOS:
                     errors.append(f"Unknown scenario: {scenario_key}")
                     continue
 
