@@ -94,25 +94,27 @@ class FFIECSource(BaseSource):
 
             try:
                 if reporting_period:
-                    result = downloader.download(
-                        product=product,
-                        period=reporting_period,
-                        format=FileFormat.TSV,
-                        save_to_disk=False,
-                    )
+                    period = reporting_period
                 else:
-                    result = downloader.download_latest(
-                        product=product,
-                        format=FileFormat.TSV,
-                        save_to_disk=False,
-                    )
+                    period = downloader.get_latest_period(product)
+
+                result = downloader.download(
+                    product=product,
+                    period=period,
+                    format=FileFormat.TSV,
+                    save_to_disk=False,
+                )
 
                 content = self._extract_content(result)
                 if content is None:
                     errors.append(f"No data returned for {product_key}")
                     continue
 
-                parsed = self._parse_zip_tsv(content, product_key, reporting_period)
+                period_str = (
+                    period if isinstance(period, str)
+                    else getattr(period, "yyyymmdd", str(period))
+                )
+                parsed = self._parse_zip_tsv(content, product_key, period_str)
                 records.extend(parsed)
 
             except Exception as e:
