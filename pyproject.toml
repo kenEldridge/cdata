@@ -49,6 +49,7 @@ dependencies = [
     # Financial
     "yfinance>=0.2",
     "fredapi>=0.5",
+    "ffiec-data-collector>=2.0.0rc1",
 
     # RSS
     "feedparser>=6.0",
@@ -81,6 +82,8 @@ cdata = "cdata.cli.app:app"
 [project.entry-points."cdata.sources"]
 yfinance = "cdata.sources.api.financial.yfinance:YFinanceSource"
 fred = "cdata.sources.api.financial.fred:FREDSource"
+bls = "cdata.sources.api.financial.bls:BLSSource"
+ffiec = "cdata.sources.api.financial.ffiec:FFIECSource"
 rss = "cdata.sources.rss.feedparser:RSSSource"
 sparql = "cdata.sources.linked_data.sparql:SPARQLSource"
 scraping = "cdata.sources.scraping.generic:ScrapingSource"

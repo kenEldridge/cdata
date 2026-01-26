@@ -113,6 +113,12 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
         pass
 
     try:
+        from cdata.sources.api.financial.ffiec import FFIECSource
+        registry.register("ffiec", FFIECSource)
+    except ImportError:
+        pass
+
+    try:
         from cdata.sources.api.sports.espn_cbb import ESPNCBBSource
         registry.register("espn_cbb", ESPNCBBSource)
     except ImportError:
