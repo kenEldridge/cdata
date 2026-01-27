@@ -1,7 +1,11 @@
 """Plugin registry for data sources."""
 
+import importlib.util
+import inspect
+import sys
 from functools import lru_cache
 from importlib.metadata import entry_points
+from pathlib import Path
 from typing import Optional, Type
 
 from cdata.config.schema import SourceConfig
@@ -63,8 +67,11 @@ class SourceRegistry:
 @lru_cache
 def get_registry() -> SourceRegistry:
     """Get the global source registry."""
+    from cdata.config.env import get_settings
+
     registry = SourceRegistry()
     _register_builtin_sources(registry)
+    _load_custom_sources(registry, get_settings().sources_module_dir)
     return registry
 
 
@@ -123,3 +130,36 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
         registry.register("espn_cbb", ESPNCBBSource)
     except ImportError:
         pass
+
+
+def _load_custom_sources(registry: SourceRegistry, sources_dir: Path) -> None:
+    """Load custom source classes from a directory of .py files."""
+    sources_dir = sources_dir.resolve()
+    if not sources_dir.is_dir():
+        return
+
+    for py_file in sorted(sources_dir.glob("*.py")):
+        if py_file.name.startswith("_"):
+            continue
+
+        module_name = py_file.stem
+        spec = importlib.util.spec_from_file_location(module_name, py_file)
+        if spec is None or spec.loader is None:
+            continue
+
+        try:
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
+            spec.loader.exec_module(module)
+        except Exception:
+            sys.modules.pop(module_name, None)
+            continue
+
+        for _name, obj in inspect.getmembers(module, inspect.isclass):
+            if (
+                issubclass(obj, BaseSource)
+                and obj is not BaseSource
+                and hasattr(obj, "source_type")
+                and obj.source_type != "base"
+            ):
+                registry.register(obj.source_type, obj)
