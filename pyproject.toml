@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cdata"
-version = "0.1.0"
+version = "0.0.0"
 description = "Personal data scavenger - pull data from the web at will"
 readme = "README.md"
 license = "MIT"
