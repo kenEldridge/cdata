@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     config_dir: Path = Path("./config")
     data_dir: Path = Path("./data")
     logs_dir: Path = Path("./logs")
+    sources_module_dir: Path = Path("./sources")
 
     # API Keys (optional, loaded from .env)
     alphavantage_api_key: Optional[str] = None
