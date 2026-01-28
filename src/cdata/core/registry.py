@@ -131,6 +131,18 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
     except ImportError:
         pass
 
+    try:
+        from cdata.sources.api.financial.sec_edgar import SECEDGARSource
+        registry.register("sec_edgar", SECEDGARSource)
+    except ImportError:
+        pass
+
+    try:
+        from cdata.sources.api.financial.nic_bhc import NICBHCSource
+        registry.register("nic_bhc", NICBHCSource)
+    except ImportError:
+        pass
+
 
 def _load_custom_sources(registry: SourceRegistry, sources_dir: Path) -> None:
     """Load custom source classes from a directory of .py files."""
