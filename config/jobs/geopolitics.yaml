@@ -1,0 +1,22 @@
+# Geopolitics & conflict data jobs
+
+jobs:
+  - id: weekly_acled_refresh
+    source: acled_conflict_events
+    enabled: true
+    description: "Refresh ACLED conflict data twice weekly"
+    schedule:
+      type: cron
+      expression: "0 6 * * 1,4"
+    storage:
+      backend: parquet
+
+  - id: daily_isw_refresh
+    source: isw_assessments
+    enabled: true
+    description: "Fetch ISW assessments daily"
+    schedule:
+      type: cron
+      expression: "0 8 * * *"
+    storage:
+      backend: parquet

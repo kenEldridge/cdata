@@ -89,6 +89,8 @@ sparql = "cdata.sources.linked_data.sparql:SPARQLSource"
 scraping = "cdata.sources.scraping.generic:ScrapingSource"
 fed_stress = "cdata.sources.api.financial.fed_stress:FedStressSource"
 espn_cbb = "cdata.sources.api.sports.espn_cbb:ESPNCBBSource"
+acled = "cdata.sources.api.geopolitics.acled:ACLEDSource"
+gdelt = "cdata.sources.api.geopolitics.gdelt:GDELTSource"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cdata"]

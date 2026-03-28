@@ -1,0 +1,58 @@
+# Geopolitics & Conflict Data Sources
+
+sources:
+  # ===================
+  # ISW CAMPAIGN ASSESSMENTS
+  # ===================
+  - id: isw_assessments
+    name: "ISW Campaign Assessments"
+    type: rss
+    enabled: true
+    description: "Institute for the Study of War daily campaign assessments"
+    primary_keys: ["link"]
+    config:
+      feeds:
+        - name: ISW
+          url: https://www.understandingwar.org/rss.xml
+
+  # ===================
+  # ACLED CONFLICT EVENTS
+  # ===================
+  - id: acled_conflict_events
+    name: "ACLED Conflict Events"
+    type: acled
+    enabled: false
+    description: "Armed conflict and protest events from ACLED (requires institutional API access)"
+    primary_keys: ["event_id_cnty"]
+    incremental: false
+    config:
+      countries: ["Ukraine", "Israel", "Syria"]
+      lookback_days: 90
+
+  # ===================
+  # GDELT CONFLICT EVENTS
+  # ===================
+  - id: gdelt_conflict_events
+    name: "GDELT Conflict Events"
+    type: gdelt
+    enabled: true
+    description: "Military and conflict events from GDELT (verbal + material conflict)"
+    primary_keys: ["GLOBALEVENTID"]
+    incremental: false
+    config:
+      countries:
+        - Ukraine
+        - Russia
+        - Israel
+        - Palestine
+        - Iran
+        - Syria
+        - China
+        - Taiwan
+        - North Korea
+        - South Korea
+        - Yemen
+        - Lebanon
+      lookback_days: 1
+      quad_classes: [3, 4]
+      min_mentions: 3

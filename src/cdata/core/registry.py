@@ -143,6 +143,18 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
     except ImportError:
         pass
 
+    try:
+        from cdata.sources.api.geopolitics.acled import ACLEDSource
+        registry.register("acled", ACLEDSource)
+    except ImportError:
+        pass
+
+    try:
+        from cdata.sources.api.geopolitics.gdelt import GDELTSource
+        registry.register("gdelt", GDELTSource)
+    except ImportError:
+        pass
+
 
 def _load_custom_sources(registry: SourceRegistry, sources_dir: Path) -> None:
     """Load custom source classes from a directory of .py files."""

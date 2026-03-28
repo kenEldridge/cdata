@@ -79,9 +79,15 @@ class RSSSource(BaseSource):
         return self._create_result(records, started_at, error=error_msg)
 
     def test_connection(self) -> bool:
-        """Test connection by parsing a known feed."""
+        """Test connection by parsing the first configured feed (or a fallback)."""
         try:
-            parsed = feedparser.parse("https://news.ycombinator.com/rss")
+            feeds = self.config.config.get("feeds", [])
+            url = self.config.config.get("url")
+            if feeds:
+                url = feeds[0]["url"]
+            if not url:
+                url = "https://news.ycombinator.com/rss"
+            parsed = feedparser.parse(url)
             return len(parsed.entries) > 0
         except Exception:
             return False
