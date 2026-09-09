@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  CDC WONDER Underlying Cause of Death request template.
+
+  Exported from the WONDER web UI and parameterized. The double-brace
+  placeholders below are substituted by CDCWonderSource._build_request_xml:
+
+    GROUP_BY_1..3 - group-by field codes (D76.V*), "*None*" for unused slots
+    ICD_CODES     - one <value> element per ICD-10 code
+    YEAR_VALUES   - one <value> element per data year
+
+  Sub-national (state / county) grouping is blocked over the WONDER API - this
+  template is national-only by design. State-level rates have to come from
+  WISQARS or a manual WONDER UI export.
+
+  Field codes (Underlying Cause of Death):
+    D76.V1  Year
+    D76.V5  Ten-Year Age Groups
+    D76.V7  Sex
+    D76.V8  Race
+    D76.V2  ICD-10 Codes
+    D76.V9  State  (accepted in the UI, rejected by the API)
+-->
+<request-parameters>
+  <parameter>
+    <name>accept_datause_restrictions</name>
+    <value>true</value>
+  </parameter>
+
+  <!-- Group-by (B_1..B_4). Unused slots must be "*None*". -->
+  <parameter>
+    <name>B_1</name>
+    <value>{{GROUP_BY_1}}</value>
+  </parameter>
+  <parameter>
+    <name>B_2</name>
+    <value>{{GROUP_BY_2}}</value>
+  </parameter>
+  <parameter>
+    <name>B_3</name>
+    <value>{{GROUP_BY_3}}</value>
+  </parameter>
+  <parameter>
+    <name>B_4</name>
+    <value>*None*</value>
+  </parameter>
+
+  <!-- Measures: deaths, population, crude rate, age-adjusted rate. -->
+  <parameter>
+    <name>M_1</name>
+    <value>D76.M1</value>
+  </parameter>
+  <parameter>
+    <name>M_2</name>
+    <value>D76.M2</value>
+  </parameter>
+  <parameter>
+    <name>M_3</name>
+    <value>D76.M3</value>
+  </parameter>
+  <parameter>
+    <name>M_41</name>
+    <value>D76.M41</value>
+  </parameter>
+  <parameter>
+    <name>M_42</name>
+    <value>D76.M42</value>
+  </parameter>
+
+  <!-- Year filter. -->
+  <parameter>
+    <name>F_D76.V1</name>
+{{YEAR_VALUES}}
+  </parameter>
+  <parameter>
+    <name>I_D76.V1</name>
+    <value>*All*</value>
+  </parameter>
+
+  <!-- Underlying cause of death: explicit ICD-10 code list. -->
+  <parameter>
+    <name>F_D76.V2</name>
+{{ICD_CODES}}
+  </parameter>
+  <parameter>
+    <name>I_D76.V2</name>
+    <value>*All*</value>
+  </parameter>
+  <parameter>
+    <name>V_D76.V2</name>
+    <value/>
+  </parameter>
+  <parameter>
+    <name>O_ucd</name>
+    <value>D76.V2</value>
+  </parameter>
+
+  <!-- Unfiltered dimensions. -->
+  <parameter>
+    <name>F_D76.V9</name>
+    <value>*All*</value>
+  </parameter>
+  <parameter>
+    <name>V_D76.V5</name>
+    <value>*All*</value>
+  </parameter>
+  <parameter>
+    <name>V_D76.V7</name>
+    <value>*All*</value>
+  </parameter>
+  <parameter>
+    <name>V_D76.V8</name>
+    <value>*All*</value>
+  </parameter>
+
+  <!-- Output options. -->
+  <parameter>
+    <name>O_show_totals</name>
+    <value>false</value>
+  </parameter>
+  <parameter>
+    <name>O_precision</name>
+    <value>1</value>
+  </parameter>
+  <parameter>
+    <name>O_timeout</name>
+    <value>600</value>
+  </parameter>
+  <parameter>
+    <name>O_title</name>
+    <value>cdata drowning mortality</value>
+  </parameter>
+  <parameter>
+    <name>O_aar</name>
+    <value>aar_std</value>
+  </parameter>
+  <parameter>
+    <name>O_age</name>
+    <value>D76.V5</value>
+  </parameter>
+  <parameter>
+    <name>O_javascript</name>
+    <value>off</value>
+  </parameter>
+</request-parameters>

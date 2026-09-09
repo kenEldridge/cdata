@@ -155,6 +155,24 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
     except ImportError:
         pass
 
+    try:
+        from cdata.sources.api.safety.nws_surf_zone import NWSSurfZoneSource
+        registry.register("nws_surf_zone", NWSSurfZoneSource)
+    except ImportError:
+        pass
+
+    try:
+        from cdata.sources.api.safety.ncei_storm_events import NCEIStormEventsSource
+        registry.register("ncei_storm_events", NCEIStormEventsSource)
+    except ImportError:
+        pass
+
+    try:
+        from cdata.sources.api.safety.cdc_wonder import CDCWonderSource
+        registry.register("cdc_wonder", CDCWonderSource)
+    except ImportError:
+        pass
+
 
 def _load_custom_sources(registry: SourceRegistry, sources_dir: Path) -> None:
     """Load custom source classes from a directory of .py files."""

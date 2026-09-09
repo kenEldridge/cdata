@@ -1,0 +1,82 @@
+# Drowning / water-safety data sources
+#
+# Two layers, deliberately kept in separate datasets:
+#   Layer B (incident-level) - nws_surf_zone, ncei_storm_events
+#   Layer A (aggregate)      - cdc_wonder_drowning
+# They double-count each other (a rip-current death is in NWS *and* in CDC's
+# W65-W74 total), so nothing downstream merges them.
+#
+# Cadence note: these are NOT daily sources. NWS updates in-season weekly, NCEI
+# monthly with a two to three month lag, WONDER annually. the-derple-dex
+# enforces that with a staleness cache in scripts/fetch_cache.py rather than
+# with cron jobs, because its build calls sources through the bridge rather
+# than through cdata's scheduler.
+
+sources:
+  - id: nws_surf_zone
+    name: "NWS Surf Zone Fatalities"
+    type: nws_surf_zone
+    enabled: true
+    description: "Preliminary surf-zone fatalities, NWS forecast areas"
+    primary_keys: ["incident_id"]
+    incremental: true
+    config:
+      start_year: 2010
+      prefer_arcgis: true          # try FeatureServer for real coordinates first
+      arcgis_item_id: "0c1d0029571141a6a26160d14cf1179c"
+      max_missing_years: 3
+
+  - id: ncei_storm_events
+    name: "NCEI Storm Events - water fatalities"
+    type: ncei_storm_events
+    enabled: true
+    description: "Weather-caused drownings 1996-present, with coordinates"
+    primary_keys: ["incident_id"]
+    incremental: true
+    config:
+      start_year: 1996
+      event_types: ["Rip Current", "High Surf", "Flash Flood", "Flood",
+                    "Coastal Flood", "Storm Surge/Tide", "Tsunami"]
+
+  - id: cdc_wonder_drowning
+    name: "CDC WONDER - drowning mortality"
+    type: cdc_wonder
+    enabled: true
+    description: "National drowning deaths and rates by year, age group and sex"
+    primary_keys: ["stat_id"]
+    incremental: false
+    config:
+      databases: ["D158", "D76"]
+      # X71 and X92 (intentional drowning) are excluded by policy and the
+      # source class rejects them if they are ever added here.
+      icd_codes: ["W65-W74", "V90", "V92", "Y21"]
+      # ["year"] is the only pass that yields a true national total - WONDER
+      # emits no totals row on a grouped query, and age-adjusted rates cannot
+      # be summed back up from age strata.
+      groupings: [["year"], ["year", "age_group"]]
+      # WONDER's own 429 body asks for at least 15 seconds between API
+      # requests; 20 gives headroom.
+      min_seconds_between_requests: 20
+
+  # ---------------------------------------------------------------------
+  # Tier 2 / Tier 3 - not implemented yet, listed so the intent is visible.
+  # ---------------------------------------------------------------------
+
+  - id: uscg_bard
+    name: "USCG Boating Accident Report Database"
+    type: uscg_bard
+    enabled: false                 # source class not written yet
+    description: "Boating drownings; needs a staged bulk download"
+    primary_keys: ["incident_id"]
+    config:
+      local_path: "data/manual/bard/"
+
+  - id: glsrp
+    name: "Great Lakes Surf Rescue Project"
+    type: glsrp
+    enabled: false                 # enable only after contacting GLSRP
+    description: "Volunteer-compiled Great Lakes drownings; non-official source"
+    primary_keys: ["incident_id"]
+    config:
+      url: "https://glsrp.org/tracking-drowning-stats/"
+      max_requests_per_run: 2
