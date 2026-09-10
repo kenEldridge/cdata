@@ -215,6 +215,17 @@ STATE_NAMES: dict[str, str] = {
 GREAT_LAKES = ("lake michigan", "lake superior", "lake huron", "lake erie",
                "lake ontario", "lake st. clair", "lake st clair")
 
+#: Rough bounding boxes (lat_min, lat_max, lon_min, lon_max), deliberately
+#: generous - a false positive here just means a shoreline point near a lake
+#: gets correctly called a Great Lake, not that an inland lake far away does.
+GREAT_LAKES_BOUNDS: tuple[tuple[str, float, float, float, float], ...] = (
+    ("Superior", 46.4, 49.0, -92.3, -84.3),
+    ("Michigan", 41.6, 46.1, -88.0, -84.7),
+    ("Huron", 43.0, 46.4, -84.8, -79.8),
+    ("Erie", 41.3, 42.9, -83.5, -78.8),
+    ("Ontario", 43.1, 44.3, -79.8, -76.1),
+)
+
 #: A real User-Agent with a contact URL, used by every scraping source here.
 #: Sites that rate-limit or block deserve to know who is knocking.
 USER_AGENT = (
@@ -335,6 +346,31 @@ def classify_water_body(name: Optional[str], place_name: Optional[str] = None) -
         if needle in blob:
             return kind
     return "unknown"
+
+
+def reclassify_great_lakes_by_coords(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Fix ``water_body_type`` for rows sitting on a Great Lake shoreline
+    that :func:`classify_water_body` couldn't tell from free text alone.
+
+    NWS forecast-zone names like "ASHTABULA LAKESHORE" or a specific place
+    like "Whiting Lakefront Park" don't literally say "Lake Erie"/"Lake
+    Michigan", so the text classifier falls back to the generic "lake"
+    match (``inland_lake``) or gives up (``unknown``). Coordinates - once a
+    row has them, which for most sources is only after geocoding - settle
+    it unambiguously. Never overrides a confident non-lake classification
+    (ocean, river, pool, ...); only touches the ambiguous buckets.
+    """
+    for row in rows:
+        if row.get("water_body_type") not in ("inland_lake", "unknown"):
+            continue
+        lat, lon = row.get("lat"), row.get("lon")
+        if lat is None or lon is None:
+            continue
+        for _, lat_min, lat_max, lon_min, lon_max in GREAT_LAKES_BOUNDS:
+            if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
+                row["water_body_type"] = "great_lake"
+                break
+    return rows
 
 
 def normalize_place(value: Any) -> str:
@@ -767,6 +803,7 @@ __all__ = [
     "build_incident",
     "build_stat",
     "classify_water_body",
+    "reclassify_great_lakes_by_coords",
     "dedup_incidents",
     "is_excluded_icd",
     "make_incident_id",

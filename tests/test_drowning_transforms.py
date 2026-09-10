@@ -46,6 +46,7 @@ from cdata.transforms.drowning import (
     normalize_state,
     parse_age,
     parse_incident_date,
+    reclassify_great_lakes_by_coords,
     redact_narrative,
     sanitize_incident,
 )
@@ -143,6 +144,31 @@ def test_classify_water_body_prefers_great_lakes_and_admits_ignorance():
     assert classify_water_body("Lake Wobegon") == "inland_lake"
     assert classify_water_body(None, "") == "unknown"
     assert classify_water_body("somewhere damp") == "unknown"
+
+
+def test_reclassify_great_lakes_by_coords_settles_ambiguous_zone_names():
+    # "ASHTABULA LAKESHORE" is an NWS zone name that never says "Erie" -
+    # classify_water_body alone can't know it's a Great Lake. Real coords
+    # (only available post-geocode) settle it.
+    rows = [
+        {"place_name": "ASHTABULA LAKESHORE", "water_body_type": "inland_lake",
+         "lat": 41.9, "lon": -80.8},
+        # Lake Norman, NC - a genuine inland lake, must NOT get relabeled.
+        {"place_name": "Lake Norman", "water_body_type": "inland_lake",
+         "lat": 35.53, "lon": -80.95},
+        # No coordinates yet - left alone, not guessed at.
+        {"place_name": "SOUTHERN LAKE", "water_body_type": "inland_lake",
+         "lat": None, "lon": None},
+        # Already confidently classified - never overridden even if the
+        # coordinates happen to fall in a Great Lakes box.
+        {"place_name": "Cocoa Beach", "water_body_type": "ocean",
+         "lat": 45.0, "lon": -87.0},
+    ]
+    reclassify_great_lakes_by_coords(rows)
+    assert rows[0]["water_body_type"] == "great_lake"
+    assert rows[1]["water_body_type"] == "inland_lake"
+    assert rows[2]["water_body_type"] == "inland_lake"
+    assert rows[3]["water_body_type"] == "ocean"
 
 
 def test_parse_incident_date_precision_degrades_honestly():
