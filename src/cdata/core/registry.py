@@ -173,6 +173,12 @@ def _register_builtin_sources(registry: SourceRegistry) -> None:
     except ImportError:
         pass
 
+    try:
+        from cdata.sources.api.safety.uscg_bard import USCGBardSource
+        registry.register("uscg_bard", USCGBardSource)
+    except ImportError:
+        pass
+
 
 def _load_custom_sources(registry: SourceRegistry, sources_dir: Path) -> None:
     """Load custom source classes from a directory of .py files."""

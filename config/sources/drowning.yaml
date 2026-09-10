@@ -65,11 +65,10 @@ sources:
   - id: uscg_bard
     name: "USCG Boating Accident Report Database"
     type: uscg_bard
-    enabled: false                 # source class not written yet
-    description: "Boating drownings; needs a staged bulk download"
+    enabled: true
+    description: "Boating drownings 2009-2023, via the Data Liberation Project's FOIA release"
     primary_keys: ["incident_id"]
-    config:
-      local_path: "data/manual/bard/"
+    config: {}
 
   - id: glsrp
     name: "Great Lakes Surf Rescue Project"

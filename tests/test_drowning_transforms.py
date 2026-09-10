@@ -24,6 +24,7 @@ from cdata.sources.api.safety.ncei_storm_events import (
     WATER_FATALITY_LOCATIONS,
     NCEIStormEventsSource,
 )
+from cdata.sources.api.safety.uscg_bard import USCGBardSource
 from cdata.sources.api.safety.nws_surf_zone import (
     NWSSurfZoneSource,
     _parse_legend,
@@ -503,6 +504,63 @@ def test_ncei_does_not_ingest_the_free_text_narratives(ncei_incidents):
         assert incident["notes"].endswith(("(direct)", "(indirect)"))
 
 
+# ---------------------------------------------------------------------------
+# USCG BARD parsing
+# ---------------------------------------------------------------------------
+
+
+BARD_CONFIG = SourceConfig(
+    id="uscg_bard", name="USCG BARD", type="uscg_bard", config={},
+    primary_keys=["incident_id"],
+)
+
+
+@pytest.fixture
+def bard_incidents():
+    source = USCGBardSource(BARD_CONFIG)
+    client = _StubClient(
+        {
+            "Accidents": (FIXTURES / "bard_accidents_sample.csv").read_bytes(),
+            "Deaths": (FIXTURES / "bard_deaths_sample.csv").read_bytes(),
+        }
+    )
+    return source._incidents_for_period(
+        client, "https://example/Accidents.csv", "https://example/Deaths.csv",
+        datetime(2026, 1, 1),
+    )
+
+
+def test_bard_keeps_only_drowning_deaths_with_a_valid_state(bard_incidents):
+    # NC-2020-0999 dies of a heart attack (excluded); XX-2020-0001 drowns but
+    # has an unrecognized state code (excluded). Only the real Lake Norman
+    # drowning survives.
+    assert len(bard_incidents) == 1
+    assert bard_incidents[0]["place_name"] == "Mooresville"
+    assert bard_incidents[0]["water_body_name"] == "LAKE NORMAN"
+    assert bard_incidents[0]["water_body_type"] == "inland_lake"
+    assert bard_incidents[0]["state"] == "NC"
+
+
+def test_bard_only_trusts_coordinates_flagged_confident(bard_incidents):
+    row = bard_incidents[0]
+    assert row["lat"] == pytest.approx(35.526943)
+    assert row["lon"] == pytest.approx(-80.940277)
+    assert row["geo_precision"] == "exact"
+
+
+def test_bard_maps_accident_event_to_hazard_and_activity(bard_incidents):
+    row = bard_incidents[0]
+    assert row["hazard"] == "fall_overboard"
+    assert row["activity"] == "boating"
+
+
+def test_bard_does_not_ingest_the_free_text_narrative_or_gender_guess(bard_incidents):
+    row = bard_incidents[0]
+    assert set(row) == set(INCIDENT_FIELDS)
+    assert "fell from a boat" not in (row["notes"] or "")
+    assert row["sex"] == "U"
+
+
 def test_water_fatality_location_set_is_explicit():
     # Guards against someone widening the filter without thinking about it.
     assert "IN WATER" in WATER_FATALITY_LOCATIONS
@@ -838,6 +896,7 @@ def test_geocoder_handles_state_name_column_not_just_state_alpha(tmp_path):
         ("nws_surf_zone", NWSSurfZoneSource),
         ("ncei_storm_events", NCEIStormEventsSource),
         ("cdc_wonder", CDCWonderSource),
+        ("uscg_bard", USCGBardSource),
     ],
 )
 def test_drowning_sources_are_registered(source_type, expected):

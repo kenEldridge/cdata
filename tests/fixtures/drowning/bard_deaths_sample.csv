@@ -1,0 +1,4 @@
+BARDID,VesselID,DeceasedID,Year,DeceasedAge,DeceasedGender,CauseofDeath
+NC-2020-0020,1,1001,2020,28,-1,Drowning
+NC-2020-0999,1,1002,2020,60,-1,Cardiac arrest
+XX-2020-0001,1,1003,2020,40,0,Drowning

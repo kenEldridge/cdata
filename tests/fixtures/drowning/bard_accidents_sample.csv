@@ -1,0 +1,4 @@
+BARDID,State,Year,RedactedNarrative,NumberDeaths,Date,LATITUDE,LONGITUDE,CoordinatesConfidence,NameOfBodyOfWater,NearestCityorTown,County,AccidentEvent1
+NC-2020-0020,NC,2020,"A person fell from a boat.",1,2020-05-03 00:00:00,35.526943,-80.940277,C,LAKE NORMAN,Mooresville,Iredell,Falls overboard
+NC-2020-0999,NC,2020,"A person had a heart attack.",1,2020-06-01 00:00:00,,,NC,LAKE NORMAN,Mooresville,Iredell,Falls overboard
+XX-2020-0001,ZZ,2020,"Bad state code.",1,2020-06-01 00:00:00,,,,LAKE NORMAN,Mooresville,Iredell,Capsizing
