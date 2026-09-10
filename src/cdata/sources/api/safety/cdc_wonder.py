@@ -108,14 +108,19 @@ SUPPRESSION_MARKERS = frozenset(
     {"suppressed", "unreliable", "not applicable", "missing", "na", ""}
 )
 
+#: Code points ICD-10 never assigned, that a naive numeric range expansion
+#: would otherwise invent. Verified live against WONDER, which rejects them
+#: outright: "Invalid 'ICD-10 Codes' codes were found: 'W71, W72'". The
+#: W65-W74 drowning block genuinely skips these two - not a typo to "fix".
+NONEXISTENT_ICD_CODES = frozenset({"W71", "W72"})
+
 #: ICD code prefix -> intent. Codes are queried one intent group at a time so
 #: that undetermined-intent drownings (Y21) never get folded into the
 #: unintentional headline number.
 ICD_INTENTS = {
     "W65": "unintentional", "W66": "unintentional", "W67": "unintentional",
     "W68": "unintentional", "W69": "unintentional", "W70": "unintentional",
-    "W71": "unintentional", "W72": "unintentional", "W73": "unintentional",
-    "W74": "unintentional",
+    "W73": "unintentional", "W74": "unintentional",
     "V90": "unintentional", "V92": "unintentional",
     "Y21": "undetermined",
 }
@@ -170,8 +175,9 @@ class CDCWonderSource(BaseSource):
         """Expand ``"W65-W74"`` into the individual codes WONDER expects.
 
         WONDER's own value list is per-code, so a range has to be spelled out.
-        Any expansion that lands on an excluded intentional-drowning code is
-        dropped, which is why a range is never passed through verbatim.
+        Any expansion that lands on an excluded intentional-drowning code, or
+        on a code ICD-10 never assigned within the range, is dropped - which
+        is why a range is never passed through verbatim.
         """
         expanded: list[str] = []
         for code in codes:
@@ -183,7 +189,10 @@ class CDCWonderSource(BaseSource):
                     expanded.append(f"{letter}{number:02d}")
             else:
                 expanded.append(text)
-        return [c for c in expanded if c not in EXCLUDED_ICD_CODES]
+        return [
+            c for c in expanded
+            if c not in EXCLUDED_ICD_CODES and c not in NONEXISTENT_ICD_CODES
+        ]
 
     def _build_request_xml(
         self, db_id: str, icd_codes: list[str], years: list[int], group_by: list[str]
