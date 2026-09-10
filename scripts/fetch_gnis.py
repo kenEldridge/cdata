@@ -12,8 +12,19 @@ water/place-adjacent classes only), and writes one pipe-delimited file into
 (``feature_name``, ``feature_class``, ``state_name``, ``prim_lat_dec``,
 ``prim_long_dec``).
 
+Any project that consumes ``cdata`` as a library (e.g. the-derple-dex) reads
+this file from its *own* ``data/reference/gnis/`` - the same pattern already
+used for the committed geocode cache - not from wherever ``cdata`` itself is
+checked out or installed. Pass that project's own repo root explicitly:
+
 Usage:
+    python scripts/fetch_gnis.py [output-repo-root]
+
+    # from cdata's own repo, stages into cdata/data/reference/gnis/:
     python scripts/fetch_gnis.py
+
+    # from another project, stages into that project's own directory:
+    python scripts/fetch_gnis.py /path/to/the-derple-dex
 """
 
 import csv
@@ -29,8 +40,9 @@ NATIONAL_FILE_URL = (
     "DomesticNames/DomesticNames_National_Text.zip"
 )
 
-REPO_ROOT = Path(__file__).parent.parent
-OUTPUT_PATH = REPO_ROOT / "data" / "reference" / "gnis" / "national_filtered.psv"
+CDATA_ROOT = Path(__file__).parent.parent
+OUTPUT_ROOT = Path(sys.argv[1]) if len(sys.argv) > 1 else CDATA_ROOT
+OUTPUT_PATH = OUTPUT_ROOT / "data" / "reference" / "gnis" / "national_filtered.psv"
 
 # Columns kept in the staged file - matches what
 # cdata.transforms.geocode.Geocoder._load_gazetteer reads.
@@ -41,7 +53,7 @@ OUTPUT_FIELDS = [
 
 
 def main() -> None:
-    sys.path.insert(0, str(REPO_ROOT / "src"))
+    sys.path.insert(0, str(CDATA_ROOT / "src"))
     from cdata.transforms.geocode import GNIS_FEATURE_CLASSES
 
     print(f"Downloading {NATIONAL_FILE_URL} ...")
