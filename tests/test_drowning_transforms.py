@@ -532,13 +532,23 @@ def bard_incidents():
 
 def test_bard_keeps_only_drowning_deaths_with_a_valid_state(bard_incidents):
     # NC-2020-0999 dies of a heart attack (excluded); XX-2020-0001 drowns but
-    # has an unrecognized state code (excluded). Only the real Lake Norman
-    # drowning survives.
-    assert len(bard_incidents) == 1
-    assert bard_incidents[0]["place_name"] == "Mooresville"
-    assert bard_incidents[0]["water_body_name"] == "LAKE NORMAN"
-    assert bard_incidents[0]["water_body_type"] == "inland_lake"
-    assert bard_incidents[0]["state"] == "NC"
+    # has an unrecognized state code (excluded). The two real Lake Norman
+    # drownings (NC-2020-0020, NC-2022-0016) survive.
+    assert len(bard_incidents) == 2
+    by_bardid = {row["place_name"] + row["date"]: row for row in bard_incidents}
+    row = by_bardid["Mooresville2020-05-03"]
+    assert row["water_body_name"] == "LAKE NORMAN"
+    assert row["water_body_type"] == "inland_lake"
+    assert row["state"] == "NC"
+
+
+def test_bard_fixes_known_water_body_name_typos(bard_incidents):
+    # NC-2022-0016's real NameOfBodyOfWater is "LAKKE NORMAN" - confirmed by
+    # inspecting the actual raw file while chasing why a real 2022 Lake
+    # Norman death wasn't grouping with the rest under one name.
+    row = next(r for r in bard_incidents if r["place_name"] == "LONG ISLAND")
+    assert row["water_body_name"] == "LAKE NORMAN"
+    assert row["water_body_type"] == "inland_lake"
 
 
 def test_bard_only_trusts_coordinates_flagged_confident(bard_incidents):

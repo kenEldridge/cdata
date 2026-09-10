@@ -77,6 +77,15 @@ ACCIDENT_EVENT_HAZARDS = {
     "flooding/swamping": "flood",
 }
 
+#: Confirmed-by-inspection typos in NameOfBodyOfWater, not an exhaustive
+#: spell-checker. Found while cross-checking Lake Norman, NC against known
+#: 2022 incidents: NC-2022-0016's water body is "LAKKE NORMAN", which fails
+#: classify_water_body's plain "lake" substring match and would confuse
+#: anyone grepping the output for the real name.
+WATER_BODY_NAME_FIXES = {
+    "LAKKE NORMAN": "LAKE NORMAN",
+}
+
 
 def _clean(value: Any) -> str:
     if value is None:
@@ -160,6 +169,10 @@ class USCGBardSource(BaseSource):
 
             iso_date, precision = self._parse_bard_date(row.get("Date"))
             water_body_name = _clean(row.get("NameOfBodyOfWater")) or None
+            if water_body_name:
+                water_body_name = WATER_BODY_NAME_FIXES.get(
+                    water_body_name.upper(), water_body_name
+                )
             place_name = _clean(row.get("NearestCityorTown")) or water_body_name or ""
 
             lat = lon = None
