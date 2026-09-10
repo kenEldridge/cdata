@@ -74,8 +74,13 @@ TEMPLATE_PATH = Path(__file__).parent / "fixtures" / "wonder_ucd_template.xml"
 #: (single race). Confirm against WONDER_HELP_URL before trusting a new one.
 DATABASE_YEARS = {
     "D76": (1999, 2020),
-    "D158": (2018, datetime.utcnow().year - 1),
-    "D176": (2018, datetime.utcnow().year),
+    # WONDER's own dataset metadata reports vintage="2024" as of this fix
+    # (2026-09) - "-1" undercounts the real publication lag and gets a
+    # live "Invalid 'Year/Month' codes" rejection for the current year.
+    # NCHS underlying-cause-of-death files run roughly two years behind;
+    # bump this if a live query starts rejecting the newest year again.
+    "D158": (2018, datetime.utcnow().year - 2),
+    "D176": (2018, datetime.utcnow().year - 2),
 }
 
 #: Cosmetic dataset_code/dataset_label/dataset_vintage fields WONDER's form
@@ -208,10 +213,24 @@ class CDCWonderSource(BaseSource):
         icd_label = ",".join(icd_codes) if icd_codes else "*All*"
         year_label = ",".join(str(y) for y in years) if years else "*All*"
 
+        # WONDER refuses to compute age-adjusted rates when the query is
+        # itself grouped by age ("Age Adjusted Rates cannot be produced
+        # when the data is grouped by Age") - confirmed live. M_4 is the
+        # rate itself; its confidence interval rides along as a nested
+        # <l> element on that same cell, no separate measure needed.
+        age_adjusted_ok = "age_group" not in group_by
+        aar_mode = "aar_std" if age_adjusted_ok else "aar_none"
+        m4_parameter = (
+            f"<parameter><name>M_4</name><value>{db_id}.M4</value></parameter>"
+            if age_adjusted_ok else ""
+        )
+
         return (
             template.replace("{{DB}}", db_id)
             .replace("{{DATASET_LABEL}}", DATABASE_LABELS.get(db_id, db_id))
             .replace("{{DATASET_VINTAGE}}", str(DATABASE_YEARS.get(db_id, (0, 0))[1]))
+            .replace("{{AAR_MODE}}", aar_mode)
+            .replace("{{M4_PARAMETER}}", m4_parameter)
             .replace("{{GROUP_BY_1}}", slots[0])
             .replace("{{GROUP_BY_2}}", slots[1])
             .replace("{{GROUP_BY_3}}", slots[2])

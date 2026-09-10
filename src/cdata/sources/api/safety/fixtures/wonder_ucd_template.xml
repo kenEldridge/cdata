@@ -47,7 +47,8 @@
   <parameter><name>M_1</name><value>{{DB}}.M1</value></parameter>
   <parameter><name>M_2</name><value>{{DB}}.M2</value></parameter>
   <parameter><name>M_3</name><value>{{DB}}.M3</value></parameter>
-  <parameter><name>O_aar</name><value>aar_none</value></parameter>
+  {{M4_PARAMETER}}
+  <parameter><name>O_aar</name><value>{{AAR_MODE}}</value></parameter>
   <parameter><name>B_1</name><value>{{GROUP_BY_1}}</value></parameter>
   <parameter><name>B_2</name><value>{{GROUP_BY_2}}</value></parameter>
   <parameter><name>B_3</name><value>{{GROUP_BY_3}}</value></parameter>
