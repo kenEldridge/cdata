@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Surf Zone Fatalities 2024</title></head>
+<body>
+<h1>2024 Surf Zone Fatality Summary</h1>
+<p>This data is preliminary. Locations are approximate and the totals are an undercount.</p>
+
+<!--
+  Shaped like the live NWS page: the header row is <td>, not <th>, so
+  pandas.read_html returns integer column labels with the header sitting in
+  row 0. The "Total:" row and the legend row live inside the same table.
+-->
+<table>
+  <tbody>
+    <tr>
+      <td>Rip  Current</td>
+      <td>High  Surf</td>
+      <td>Sneaker  Wave</td>
+      <td>Other  (see Key)</td>
+      <td>Not  Known</td>
+      <td>Location</td>
+      <td>ST</td>
+      <td>M/F</td>
+      <td>Age</td>
+      <td>Date</td>
+    </tr>
+    <tr>
+      <td>X</td><td></td><td></td><td></td><td></td>
+      <td>Cocoa Beach</td><td>FL</td><td>M</td><td>22</td><td>6/14/2024</td>
+    </tr>
+    <tr>
+      <td></td><td>X</td><td></td><td></td><td></td>
+      <td>Ocean Beach</td><td>CA</td><td>F</td><td>Late 20s</td><td>7/2/2024</td>
+    </tr>
+    <tr>
+      <td></td><td></td><td>X</td><td></td><td></td>
+      <td>Cannon Beach</td><td>OR</td><td>M</td><td>~41</td><td>1/9/2024</td>
+    </tr>
+    <tr>
+      <td></td><td></td><td></td><td>X-1</td><td></td>
+      <td>Port Sheldon, Lake Michigan</td><td>MI</td><td>M</td><td>17</td><td>8/3/2024</td>
+    </tr>
+    <tr>
+      <td></td><td></td><td></td><td>X-4</td><td></td>
+      <td>Grand Haven Pier</td><td>MI</td><td>F</td><td>unk</td><td>8/21/2024</td>
+    </tr>
+    <tr>
+      <td></td><td></td><td></td><td></td><td>X</td>
+      <td>Wrightsville Beach</td><td>NC</td><td>M</td><td>63</td><td>9/12/2024</td>
+    </tr>
+    <tr>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>3</td><td>1</td><td>1</td><td>2</td><td>1</td>
+      <td></td><td></td><td></td><td></td><td>Total: 6</td>
+    </tr>
+    <tr>
+      <td colspan="10">
+        <em><strong>Key: <sup>1: </sup>longshore current, <sup>2: </sup>tidal current,
+        <sup>3: </sup>outlet current, <sup>4:</sup> structural current,
+        <sup>5:</sup> shore break, 6: strong current, 7: channel current,
+        8: inlet current, 9: sandbar, 10: waves and dangerous currents<br />
+        *American Samoa, ? : unknown</strong></em>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

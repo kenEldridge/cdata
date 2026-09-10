@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page>
+  <request-parameters/>
+  <response>
+    <data-table>
+      <r>
+        <c l="2019"/>
+        <c l="1-4 years"/>
+        <c l="Female"/>
+        <c v="371" r="371"/>
+        <c v="7,908,000"/>
+        <c v="4.7"/>
+        <c v="4.7"/>
+      </r>
+      <r>
+        <c l=""/>
+        <c l=""/>
+        <c l="Male"/>
+        <c v="512" r="512"/>
+        <c v="8,270,000"/>
+        <c v="6.2"/>
+        <c v="6.2"/>
+      </r>
+      <r>
+        <c l=""/>
+        <c l="85+ years"/>
+        <c l="Female"/>
+        <c v="Suppressed"/>
+        <c v="4,100,000"/>
+        <c v="Unreliable"/>
+        <c v="Unreliable"/>
+      </r>
+      <r>
+        <c l="2020"/>
+        <c l="1-4 years"/>
+        <c l="Female"/>
+        <c v="404" r="404"/>
+        <c v="7,850,000"/>
+        <c v="5.1"/>
+        <c v="5.1"/>
+      </r>
+    </data-table>
+  </response>
+</page>

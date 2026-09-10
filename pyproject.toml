@@ -91,6 +91,9 @@ fed_stress = "cdata.sources.api.financial.fed_stress:FedStressSource"
 espn_cbb = "cdata.sources.api.sports.espn_cbb:ESPNCBBSource"
 acled = "cdata.sources.api.geopolitics.acled:ACLEDSource"
 gdelt = "cdata.sources.api.geopolitics.gdelt:GDELTSource"
+nws_surf_zone = "cdata.sources.api.safety.nws_surf_zone:NWSSurfZoneSource"
+ncei_storm_events = "cdata.sources.api.safety.ncei_storm_events:NCEIStormEventsSource"
+cdc_wonder = "cdata.sources.api.safety.cdc_wonder:CDCWonderSource"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cdata"]

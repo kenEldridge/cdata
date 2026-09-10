@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  CDC WONDER Underlying Cause of Death request template.
+
+  Verified against a live query on 2026-09-10: built by driving the real
+  WONDER web UI (headless browser, since the Finder controls populate their
+  option values via client-side JS, per CDC's own API help page - a static
+  fetch of the request form never contains them), capturing the exact POST
+  the browser sent, and confirming the equivalent request_xml round-trips
+  through the documented stateless API. That query - group by year, ICD
+  W65-W74, D158, year 2019 - returned 3,692 deaths, crude rate 1.1/100k.
+
+  The earlier version of this template sent only ~10 fields. WONDER's server
+  expects the *entire* form state - every dimension's O_/V_/F_/I_/finder-stage
+  quad, even when every one of them is just "*All*" - or it throws
+  contradictory-looking validation errors that mention the wrong dimensions.
+  This template now carries the full ~85-field skeleton; only what actually
+  varies per query is a placeholder:
+
+    DB            - database id (D76, D158, ...), substituted everywhere a
+                    field name or value embeds it
+    DATASET_LABEL - human label for dataset_code (cosmetic only)
+    DATASET_VINTAGE - vintage year for dataset_code (cosmetic only)
+    GROUP_BY_1..3 - group-by field codes, "*None*" for unused slots. Year
+                    needs a "-level1" suffix (it's a multi-level field,
+                    Year/Month); age_group/sex/race do not.
+    YEAR_VALUES / YEAR_LABEL   - one <value> per requested year; label is
+                    display-only text WONDER's Finder would show, not
+                    validated server-side, so a generic label is fine.
+    ICD_CODES / ICD_LABEL      - same pattern for ICD-10 codes.
+
+  I_* fields (the docstring in cdc_wonder.py previously suspected these of
+  being *All*-vs-specific toggles) are just that display-only echo text -
+  confirmed harmless to fill generically.
+
+  Sub-national (state/county) grouping is blocked over the WONDER API - all
+  location/urbanization dimensions below stay pinned to "*All*"/national.
+-->
+<request-parameters>
+  <parameter><name>accept_datause_restrictions</name><value>true</value></parameter>
+  <parameter><name>saved_id</name><value></value></parameter>
+  <parameter><name>dataset_code</name><value>{{DB}}</value></parameter>
+  <parameter><name>dataset_label</name><value>{{DATASET_LABEL}}</value></parameter>
+  <parameter><name>dataset_vintage</name><value>{{DATASET_VINTAGE}}</value></parameter>
+  <parameter><name>stage</name><value>request</value></parameter>
+  <parameter><name>O_javascript</name><value>on</value></parameter>
+  <parameter><name>M_1</name><value>{{DB}}.M1</value></parameter>
+  <parameter><name>M_2</name><value>{{DB}}.M2</value></parameter>
+  <parameter><name>M_3</name><value>{{DB}}.M3</value></parameter>
+  <parameter><name>O_aar</name><value>aar_none</value></parameter>
+  <parameter><name>B_1</name><value>{{GROUP_BY_1}}</value></parameter>
+  <parameter><name>B_2</name><value>{{GROUP_BY_2}}</value></parameter>
+  <parameter><name>B_3</name><value>{{GROUP_BY_3}}</value></parameter>
+  <parameter><name>B_4</name><value>*None*</value></parameter>
+  <parameter><name>B_5</name><value>*None*</value></parameter>
+  <parameter><name>M_32</name><value>{{DB}}.M32</value></parameter>
+  <parameter><name>O_title</name><value></value></parameter>
+  <parameter><name>O_oc-sect1-request</name><value>close</value></parameter>
+  <parameter><name>O_rate_per</name><value>100000</value></parameter>
+  <parameter><name>O_aar_pop</name><value>0000</value></parameter>
+  <parameter><name>VM_{{DB}}.M6_{{DB}}.V1_S</name><value>*All*</value></parameter>
+  <parameter><name>VM_{{DB}}.M6_{{DB}}.V7</name><value>*All*</value></parameter>
+  <parameter><name>VM_{{DB}}.M6_{{DB}}.V17</name><value>*All*</value></parameter>
+  <parameter><name>VM_{{DB}}.M6_{{DB}}.V42</name><value>*All*</value></parameter>
+  <parameter><name>VM_{{DB}}.M6_{{DB}}.V10</name><value></value></parameter>
+  <parameter><name>O_location</name><value>{{DB}}.V9</value></parameter>
+  <parameter><name>finder-stage-{{DB}}.V9</name><value>codeset</value></parameter>
+  <parameter><name>O_V9_fmode</name><value>freg</value></parameter>
+  <parameter><name>V_{{DB}}.V9</name><value></value></parameter>
+  <parameter><name>F_{{DB}}.V9</name><value>*All*</value></parameter>
+  <parameter><name>I_{{DB}}.V9</name><value>*All* (The United States)</value></parameter>
+  <parameter><name>finder-stage-{{DB}}.V10</name><value>codeset</value></parameter>
+  <parameter><name>O_V10_fmode</name><value>freg</value></parameter>
+  <parameter><name>V_{{DB}}.V10</name><value></value></parameter>
+  <parameter><name>F_{{DB}}.V10</name><value>*All*</value></parameter>
+  <parameter><name>I_{{DB}}.V10</name><value>*All* (The United States)</value></parameter>
+  <parameter><name>finder-stage-{{DB}}.V27</name><value>codeset</value></parameter>
+  <parameter><name>O_V27_fmode</name><value>freg</value></parameter>
+  <parameter><name>V_{{DB}}.V27</name><value></value></parameter>
+  <parameter><name>F_{{DB}}.V27</name><value>*All*</value></parameter>
+  <parameter><name>I_{{DB}}.V27</name><value>*All* (The United States)</value></parameter>
+  <parameter><name>finder-stage-{{DB}}.V30</name><value>codeset</value></parameter>
+  <parameter><name>O_V30_fmode</name><value>freg</value></parameter>
+  <parameter><name>V_{{DB}}.V30</name><value></value></parameter>
+  <parameter><name>F_{{DB}}.V30</name><value>*All*</value></parameter>
+  <parameter><name>I_{{DB}}.V30</name><value>*All* (The United States)</value></parameter>
+  <parameter><name>finder-stage-{{DB}}.V31</name><value>codeset</value></parameter>
+  <parameter><name>O_V31_fmode</name><value>freg</value></parameter>
+  <parameter><name>V_{{DB}}.V31</name><value></value></parameter>
+  <parameter><name>F_{{DB}}.V31</name><value>*All*</value></parameter>
+  <parameter><name>I_{{DB}}.V31</name><value>*All* (The United States)</value></parameter>
+  <parameter><name>O_urban</name><value>{{DB}}.V19</value></parameter>
+  <parameter><name>V_{{DB}}.V19</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V11</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V18</name><value>*All*</value></parameter>
+  <parameter><name>O_age</name><value>{{DB}}.V5</value></parameter>
+  <parameter><name>V_{{DB}}.V5</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V51</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V52</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V6</name><value>00</value></parameter>
+  <parameter><name>V_{{DB}}.V7</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V17</name><value>*All*</value></parameter>
+  <parameter><name>O_race</name><value>{{DB}}.V42</value></parameter>
+  <parameter><name>V_{{DB}}.V42</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V43</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V44</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V45</name><value>*All*</value></parameter>
+  <parameter><name>finder-stage-{{DB}}.V1</name><value>codeset</value></parameter>
+  <parameter><name>O_V1_fmode</name><value>freg</value></parameter>
+  <parameter><name>V_{{DB}}.V1</name><value></value></parameter>
+  <parameter><name>F_{{DB}}.V1</name>
+{{YEAR_VALUES}}
+  </parameter>
+  <parameter><name>I_{{DB}}.V1</name><value>{{YEAR_LABEL}}</value></parameter>
+  <parameter><name>V_{{DB}}.V24</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V20</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V21</name><value>*All*</value></parameter>
+  <parameter><name>O_ucd</name><value>{{DB}}.V2</value></parameter>
+  <parameter><name>finder-stage-{{DB}}.V2</name><value>codeset</value></parameter>
+  <parameter><name>O_V2_fmode</name><value>freg</value></parameter>
+  <parameter><name>V_{{DB}}.V2</name><value></value></parameter>
+  <parameter><name>F_{{DB}}.V2</name>
+{{ICD_CODES}}
+  </parameter>
+  <parameter><name>I_{{DB}}.V2</name><value>{{ICD_LABEL}}</value></parameter>
+  <parameter><name>V_{{DB}}.V4</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V12</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V22</name><value>*All*</value></parameter>
+  <parameter><name>V_{{DB}}.V23</name><value>*All*</value></parameter>
+  <parameter><name>finder-stage-{{DB}}.V25</name><value>codeset</value></parameter>
+  <parameter><name>O_V25_fmode</name><value>freg</value></parameter>
+  <parameter><name>V_{{DB}}.V25</name><value></value></parameter>
+  <parameter><name>F_{{DB}}.V25</name><value>*All*</value></parameter>
+  <parameter><name>I_{{DB}}.V25</name><value>All Causes of Death</value></parameter>
+  <parameter><name>O_show_totals</name><value>true</value></parameter>
+  <parameter><name>O_precision</name><value>1</value></parameter>
+  <parameter><name>O_timeout</name><value>600</value></parameter>
+</request-parameters>
