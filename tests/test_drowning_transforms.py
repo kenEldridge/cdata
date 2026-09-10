@@ -502,12 +502,14 @@ def test_wonder_groups_codes_by_intent():
 
 def test_wonder_request_xml_is_templated_not_hand_authored():
     source = CDCWonderSource(WONDER_CONFIG)
-    xml = source._build_request_xml(["W65", "W66"], [2019, 2020],
+    xml = source._build_request_xml("D76", ["W65", "W66"], [2019, 2020],
                                     ["year", "age_group", "sex"])
     assert "{{" not in xml
     assert "<value>W65</value>" in xml
     assert "<value>2019</value>" in xml
-    assert "<value>D76.V1</value>" in xml
+    assert "<value>D76.V1-level1</value>" in xml
+    assert "<value>D76.V5</value>" in xml
+    assert "<value>D76.V7</value>" in xml
     assert "accept_datause_restrictions" in xml
 
 
