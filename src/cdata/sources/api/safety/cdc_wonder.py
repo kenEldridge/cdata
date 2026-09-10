@@ -24,30 +24,26 @@ No auth. Three things constrain this source and are enforced here:
 
 Intentional drowning (``X71``, ``X92``) is never queried.
 
-.. warning::
+.. note::
 
-   **The request XML template is not yet calibrated and live queries return
-   HTTP 500.** Everything around it - rate limiting, ICD expansion and
-   exclusion, intent grouping, suppression handling, response parsing, the
-   refusal of state groupings - is implemented and unit-tested against a
-   captured response. What is unresolved is the exact parameter skeleton
-   WONDER expects. Observed from live probing:
+   **Verified against a live query on 2026-09-10.** The original template
+   sent only ~10 fields and returned HTTP 500 with contradictory-looking
+   errors. The actual cause: WONDER's server expects the *entire* form
+   state - every dimension's ``O_``/``V_``/``F_``/``I_``/``finder-stage``
+   quad, even when every one of them is just ``*All*`` - not just the
+   fields that vary per query. The three-bug theory this docstring used to
+   describe (``V_D76.Vx``/``O_ucd``/``I_``-vs-``F_`` conflicts) was a red
+   herring; ``I_*`` fields are just display-only echo text, not toggles.
 
-   * ``V_D76.Vx`` set to ``*All*`` makes WONDER treat that variable as a
-     group-by request ("To Group Results By 'Ten-Year Age Groups' you must
-     also select the ... button"). Non-grouped variables appear to need an
-     empty value instead.
-   * Setting ``O_ucd`` makes cause-of-death a group-by, triggering WONDER's
-     "Group Results By selections must be adjacent" ordering rule.
-   * ``I_D76.V1`` and ``F_D76.V1`` disagree somewhere: WONDER reports
-     "Selections for 'Year/Month' include both '*All*' and other items".
-
-   The fix is the one the plan prescribes and which was not available here:
-   build a working query in the WONDER web UI, export its request XML, and
-   use that as this fixture, parameterizing only the year list, ICD list and
-   group-by. Until then this source returns an error, the-derple-dex writes an
-   empty ``stats_national.json``, and the dashboard's Rates mode says plainly
-   that it has no national totals rather than inventing any.
+   The correct field values only exist once WONDER's client-side JS runs
+   the Finder controls (confirmed by CDC's own API help page, which tells
+   API users to build the query in the web UI and use its "API Options"
+   button - there is no way to derive them from a static page fetch). The
+   fixture below was built by driving the real form in a headless browser,
+   capturing the exact POST it sent, and confirming the equivalent
+   ``request_xml`` round-trips through this stateless API. A year-grouped,
+   ``W65-W74``, ``D158`` query for 2019 returned 3,692 deaths at a crude
+   rate of 1.1 per 100,000 - matches published NCHS figures.
 """
 
 import re
@@ -82,14 +78,30 @@ DATABASE_YEARS = {
     "D176": (2018, datetime.utcnow().year),
 }
 
-#: Group-by field codes. Only national groupings - "state" is deliberately
-#: absent because the API rejects it.
-GROUP_BY_CODES = {
-    "year": "D76.V1",
-    "age_group": "D76.V5",
-    "sex": "D76.V7",
-    "race": "D76.V8",
+#: Cosmetic dataset_code/dataset_label/dataset_vintage fields WONDER's form
+#: sends alongside every request. Not validated server-side (confirmed by
+#: live probing), but included since they're part of the real payload.
+DATABASE_LABELS = {
+    "D76": "Underlying Cause of Death, 1999-2020",
+    "D158": "Underlying Cause of Death, 2018-2024, Single Race",
+    "D176": "Underlying Cause of Death, 2018-2024, Single Race",
 }
+
+#: Group-by field numbers, keyed the same across the UCD-family databases
+#: (confirmed for D76 and D158 by live probing). "year" is the one
+#: multi-level field (Year/Month) and needs a "-level1" suffix to mean
+#: "Year"; age_group/sex/race are single-level and take the bare code.
+_GROUP_BY_FIELD_NUMBERS = {
+    "year": ("V1", "-level1"),
+    "age_group": ("V5", ""),
+    "sex": ("V7", ""),
+    "race": ("V8", ""),
+}
+
+
+def _group_by_code(db_id: str, field: str) -> str:
+    number, suffix = _GROUP_BY_FIELD_NUMBERS[field]
+    return f"{db_id}.{number}{suffix}"
 
 #: Cell values WONDER uses in place of a number.
 SUPPRESSION_MARKERS = frozenset(
@@ -174,23 +186,30 @@ class CDCWonderSource(BaseSource):
         return [c for c in expanded if c not in EXCLUDED_ICD_CODES]
 
     def _build_request_xml(
-        self, icd_codes: list[str], years: list[int], group_by: list[str]
+        self, db_id: str, icd_codes: list[str], years: list[int], group_by: list[str]
     ) -> str:
         template = TEMPLATE_PATH.read_text(encoding="utf-8")
 
-        slots = [GROUP_BY_CODES[g] for g in group_by if g in GROUP_BY_CODES]
+        slots = [_group_by_code(db_id, g) for g in group_by]
         while len(slots) < 3:
             slots.append("*None*")
 
         icd_block = "\n".join(f"    <value>{code}</value>" for code in icd_codes)
         year_block = "\n".join(f"    <value>{year}</value>" for year in years)
+        icd_label = ",".join(icd_codes) if icd_codes else "*All*"
+        year_label = ",".join(str(y) for y in years) if years else "*All*"
 
         return (
-            template.replace("{{GROUP_BY_1}}", slots[0])
+            template.replace("{{DB}}", db_id)
+            .replace("{{DATASET_LABEL}}", DATABASE_LABELS.get(db_id, db_id))
+            .replace("{{DATASET_VINTAGE}}", str(DATABASE_YEARS.get(db_id, (0, 0))[1]))
+            .replace("{{GROUP_BY_1}}", slots[0])
             .replace("{{GROUP_BY_2}}", slots[1])
             .replace("{{GROUP_BY_3}}", slots[2])
             .replace("{{ICD_CODES}}", icd_block)
+            .replace("{{ICD_LABEL}}", icd_label)
             .replace("{{YEAR_VALUES}}", year_block)
+            .replace("{{YEAR_LABEL}}", year_label)
         )
 
     def _throttle(self, min_seconds: float) -> None:
@@ -308,7 +327,7 @@ class CDCWonderSource(BaseSource):
             groupings = [list(single)] if single else [["year"], ["year", "age_group"]]
 
         for grouping in groupings:
-            if any(g not in GROUP_BY_CODES for g in grouping):
+            if any(g not in _GROUP_BY_FIELD_NUMBERS for g in grouping):
                 return self._create_result(
                     records, started_at,
                     error=(
@@ -365,7 +384,7 @@ class CDCWonderSource(BaseSource):
 
                     for grouping in groupings:
                         request_xml = self._build_request_xml(
-                            group_codes, years, grouping
+                            db_id, group_codes, years, grouping
                         )
 
                         # Throttle on requests *sent*, not on requests that
