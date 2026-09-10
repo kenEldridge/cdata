@@ -60,10 +60,12 @@ data/processed/*
 data/cache/*
 data/site/*
 data/index.json
+data/reference/gnis/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/cache/.gitkeep
 !data/site/.gitkeep
+!data/reference/gnis/.gitkeep
 
 # Logs
 logs/*.log

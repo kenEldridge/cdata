@@ -779,6 +779,28 @@ def test_geocoder_resolves_from_a_local_gnis_file(tmp_path):
     assert reloaded.stats["cache_hits"] == 1
 
 
+def test_geocoder_handles_state_name_column_not_just_state_alpha(tmp_path):
+    """USGS's current National File ships "state_name" (full name), not
+    "state_alpha" - confirmed by downloading and inspecting the real file.
+    A gazetteer built against only "state_alpha" would index every row
+    under an empty state key and never match anything.
+    """
+    gnis_dir = tmp_path / "gnis"
+    gnis_dir.mkdir()
+    (gnis_dir / "NationalFile.txt").write_text(
+        "feature_id|feature_name|feature_class|state_name|prim_lat_dec|prim_long_dec\n"
+        "1|Cocoa Beach|Beach|Florida|28.3200|-80.6076\n",
+        encoding="utf-8",
+    )
+    geocoder = Geocoder(
+        cache_path=tmp_path / "geocode.json", gnis_dir=gnis_dir, use_nominatim=False,
+    )
+    hit = geocoder.geocode("Cocoa Beach", "FL")
+    assert hit is not None
+    assert hit["provider"] == "gnis"
+    assert hit["lat"] == pytest.approx(28.32)
+
+
 # ---------------------------------------------------------------------------
 # Registry wiring
 # ---------------------------------------------------------------------------

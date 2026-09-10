@@ -145,7 +145,11 @@ class Geocoder:
 
         name_keys = ("feature_name", "FEATURE_NAME")
         class_keys = ("feature_class", "FEATURE_CLASS")
-        state_keys = ("state_alpha", "STATE_ALPHA")
+        # The current National File ships "state_name" (full name, e.g.
+        # "Florida") - "state_alpha" doesn't exist in it. Older/topical
+        # extracts have used the abbreviation under either name, so both
+        # are kept and run through normalize_state() either way.
+        state_keys = ("state_alpha", "STATE_ALPHA", "state_name", "STATE_NAME")
         lat_keys = ("prim_lat_dec", "PRIM_LAT_DEC")
         lon_keys = ("prim_long_dec", "PRIM_LONG_DEC")
 
@@ -165,7 +169,7 @@ class Geocoder:
                         feature_class = pick(row, class_keys)
                         if feature_class not in GNIS_FEATURE_CLASSES:
                             continue
-                        state = pick(row, state_keys).upper()
+                        state = normalize_state(pick(row, state_keys)) or ""
                         name = pick(row, name_keys)
                         try:
                             lat = float(pick(row, lat_keys))
